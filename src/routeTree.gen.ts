@@ -23,6 +23,7 @@ import { Route as AppExerciciosRouteImport } from './routes/_app.exercicios'
 import { Route as AppExamesRouteImport } from './routes/_app.exames'
 import { Route as AppChatRouteImport } from './routes/_app.chat'
 import { Route as AppAfiliadosRouteImport } from './routes/_app.afiliados'
+import { Route as AppAdminRouteImport } from './routes/_app.admin'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -93,10 +94,16 @@ const AppAfiliadosRoute = AppAfiliadosRouteImport.update({
   path: '/afiliados',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdminRoute = AppAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/admin': typeof AppAdminRoute
   '/afiliados': typeof AppAfiliadosRoute
   '/chat': typeof AppChatRoute
   '/exames': typeof AppExamesRoute
@@ -112,6 +119,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/admin': typeof AppAdminRoute
   '/afiliados': typeof AppAfiliadosRoute
   '/chat': typeof AppChatRoute
   '/exames': typeof AppExamesRoute
@@ -129,6 +137,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_app/admin': typeof AppAdminRoute
   '/_app/afiliados': typeof AppAfiliadosRoute
   '/_app/chat': typeof AppChatRoute
   '/_app/exames': typeof AppExamesRoute
@@ -146,6 +155,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/admin'
     | '/afiliados'
     | '/chat'
     | '/exames'
@@ -161,6 +171,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/admin'
     | '/afiliados'
     | '/chat'
     | '/exames'
@@ -177,6 +188,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_app'
     | '/auth'
+    | '/_app/admin'
     | '/_app/afiliados'
     | '/_app/chat'
     | '/_app/exames'
@@ -297,10 +309,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAfiliadosRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/admin': {
+      id: '/_app/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AppAdminRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppAdminRoute: typeof AppAdminRoute
   AppAfiliadosRoute: typeof AppAfiliadosRoute
   AppChatRoute: typeof AppChatRoute
   AppExamesRoute: typeof AppExamesRoute
@@ -314,6 +334,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAdminRoute: AppAdminRoute,
   AppAfiliadosRoute: AppAfiliadosRoute,
   AppChatRoute: AppChatRoute,
   AppExamesRoute: AppExamesRoute,
@@ -337,3 +358,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
