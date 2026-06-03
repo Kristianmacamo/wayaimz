@@ -34,7 +34,7 @@ function ChatPage() {
   const { messages, sendMessage, status, setMessages } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/chat",
-      headers: () => (token ? { Authorization: `Bearer ${token}` } : {}),
+      headers: (): Record<string, string> => (token ? { Authorization: `Bearer ${token}` } : {}),
     }),
     onError: (e) => toast.error(e.message || "Erro na conversa"),
   });
