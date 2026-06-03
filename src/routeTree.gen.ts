@@ -20,6 +20,7 @@ import { Route as AppPagamentosRouteImport } from './routes/_app.pagamentos'
 import { Route as AppExerciciosRouteImport } from './routes/_app.exercicios'
 import { Route as AppExamesRouteImport } from './routes/_app.exames'
 import { Route as AppChatRouteImport } from './routes/_app.chat'
+import { Route as AppAfiliadosRouteImport } from './routes/_app.afiliados'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -75,10 +76,16 @@ const AppChatRoute = AppChatRouteImport.update({
   path: '/chat',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAfiliadosRoute = AppAfiliadosRouteImport.update({
+  id: '/afiliados',
+  path: '/afiliados',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/afiliados': typeof AppAfiliadosRoute
   '/chat': typeof AppChatRoute
   '/exames': typeof AppExamesRoute
   '/exercicios': typeof AppExerciciosRoute
@@ -91,6 +98,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/afiliados': typeof AppAfiliadosRoute
   '/chat': typeof AppChatRoute
   '/exames': typeof AppExamesRoute
   '/exercicios': typeof AppExerciciosRoute
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_app/afiliados': typeof AppAfiliadosRoute
   '/_app/chat': typeof AppChatRoute
   '/_app/exames': typeof AppExamesRoute
   '/_app/exercicios': typeof AppExerciciosRoute
@@ -119,6 +128,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/afiliados'
     | '/chat'
     | '/exames'
     | '/exercicios'
@@ -131,6 +141,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/afiliados'
     | '/chat'
     | '/exames'
     | '/exercicios'
@@ -144,6 +155,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_app'
     | '/auth'
+    | '/_app/afiliados'
     | '/_app/chat'
     | '/_app/exames'
     | '/_app/exercicios'
@@ -240,10 +252,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppChatRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/afiliados': {
+      id: '/_app/afiliados'
+      path: '/afiliados'
+      fullPath: '/afiliados'
+      preLoaderRoute: typeof AppAfiliadosRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppAfiliadosRoute: typeof AppAfiliadosRoute
   AppChatRoute: typeof AppChatRoute
   AppExamesRoute: typeof AppExamesRoute
   AppExerciciosRoute: typeof AppExerciciosRoute
@@ -254,6 +274,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAfiliadosRoute: AppAfiliadosRoute,
   AppChatRoute: AppChatRoute,
   AppExamesRoute: AppExamesRoute,
   AppExerciciosRoute: AppExerciciosRoute,
@@ -274,3 +295,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
