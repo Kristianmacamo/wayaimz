@@ -14,16 +14,246 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      affiliate_commissions: {
+        Row: {
+          affiliate_id: string
+          amount_mt: number
+          created_at: string
+          id: string
+          paid: boolean
+          payment_id: string
+          referred_user_id: string
+        }
+        Insert: {
+          affiliate_id: string
+          amount_mt: number
+          created_at?: string
+          id?: string
+          paid?: boolean
+          payment_id: string
+          referred_user_id: string
+        }
+        Update: {
+          affiliate_id?: string
+          amount_mt?: number
+          created_at?: string
+          id?: string
+          paid?: boolean
+          payment_id?: string
+          referred_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_commissions_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["message_role"]
+          user_id: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["message_role"]
+          user_id: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["message_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount_mt: number
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          id: string
+          method: Database["public"]["Enums"]["payment_method"]
+          plan: Database["public"]["Enums"]["plan_tier"]
+          reference: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          user_id: string
+        }
+        Insert: {
+          amount_mt: number
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          method: Database["public"]["Enums"]["payment_method"]
+          plan: Database["public"]["Enums"]["plan_tier"]
+          reference?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          user_id: string
+        }
+        Update: {
+          amount_mt?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          method?: Database["public"]["Enums"]["payment_method"]
+          plan?: Database["public"]["Enums"]["plan_tier"]
+          reference?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          affiliate_code: string
+          apelido: string
+          avatar_url: string | null
+          created_at: string
+          current_plan: Database["public"]["Enums"]["plan_tier"]
+          email: string
+          emoji: string | null
+          free_chats_used: number
+          id: string
+          nivel: Database["public"]["Enums"]["education_level"]
+          nome: string
+          plan_expires_at: string | null
+          referred_by: string | null
+          suspended: boolean
+          telefone: string
+          updated_at: string
+        }
+        Insert: {
+          affiliate_code: string
+          apelido: string
+          avatar_url?: string | null
+          created_at?: string
+          current_plan?: Database["public"]["Enums"]["plan_tier"]
+          email: string
+          emoji?: string | null
+          free_chats_used?: number
+          id: string
+          nivel?: Database["public"]["Enums"]["education_level"]
+          nome: string
+          plan_expires_at?: string | null
+          referred_by?: string | null
+          suspended?: boolean
+          telefone: string
+          updated_at?: string
+        }
+        Update: {
+          affiliate_code?: string
+          apelido?: string
+          avatar_url?: string | null
+          created_at?: string
+          current_plan?: Database["public"]["Enums"]["plan_tier"]
+          email?: string
+          emoji?: string | null
+          free_chats_used?: number
+          id?: string
+          nivel?: Database["public"]["Enums"]["education_level"]
+          nome?: string
+          plan_expires_at?: string | null
+          referred_by?: string | null
+          suspended?: boolean
+          telefone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_referred_by_fkey"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_affiliate_code: { Args: never; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
+      education_level: "secundario" | "superior"
+      message_role: "user" | "assistant"
+      payment_method: "mpesa" | "paypal"
+      payment_status: "pendente" | "aprovado" | "rejeitado"
+      plan_tier: "free" | "basico" | "premium" | "completo"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +380,13 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+      education_level: ["secundario", "superior"],
+      message_role: ["user", "assistant"],
+      payment_method: ["mpesa", "paypal"],
+      payment_status: ["pendente", "aprovado", "rejeitado"],
+      plan_tier: ["free", "basico", "premium", "completo"],
+    },
   },
 } as const
