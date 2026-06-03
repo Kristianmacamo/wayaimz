@@ -23,7 +23,7 @@ const PAYPAL_EMAIL = "wayestudantes@example.com";
 function PagamentosPage() {
   const { plan } = Route.useSearch();
   const qc = useQueryClient();
-  const selected = PLANS[plan] ?? PLANS.premium;
+  const selected = PLANS[plan as PlanId] ?? PLANS.premium;
 
   const { data: payments } = useQuery({
     queryKey: ["my-payments"],
