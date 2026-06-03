@@ -10,10 +10,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_app/chat")({ component: ChatPage });
+export const Route = createFileRoute("/_app/chat")({
+  component: ChatPage,
+  validateSearch: (s: Record<string, unknown>) => ({ start: typeof s.start === "string" ? s.start : undefined }),
+});
 
 function ChatPage() {
-  const [input, setInput] = useState("");
+  const { start } = Route.useSearch();
+  const [input, setInput] = useState(start ?? "");
   const [token, setToken] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
 

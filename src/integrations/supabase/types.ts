@@ -238,6 +238,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_payment: { Args: { _payment_id: string }; Returns: undefined }
       generate_affiliate_code: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -245,6 +246,12 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      mark_commission_paid: { Args: { _id: string }; Returns: undefined }
+      reject_payment: { Args: { _payment_id: string }; Returns: undefined }
+      toggle_user_suspension: {
+        Args: { _suspended: boolean; _user_id: string }
+        Returns: undefined
       }
     }
     Enums: {
