@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AppTrabalhosRouteImport } from './routes/_app.trabalhos'
 import { Route as AppTestesRouteImport } from './routes/_app.testes'
+import { Route as AppPlanosRouteImport } from './routes/_app.planos'
 import { Route as AppExerciciosRouteImport } from './routes/_app.exercicios'
 import { Route as AppExamesRouteImport } from './routes/_app.exames'
 import { Route as AppChatRouteImport } from './routes/_app.chat'
@@ -48,6 +49,11 @@ const AppTestesRoute = AppTestesRouteImport.update({
   path: '/testes',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPlanosRoute = AppPlanosRouteImport.update({
+  id: '/planos',
+  path: '/planos',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppExerciciosRoute = AppExerciciosRouteImport.update({
   id: '/exercicios',
   path: '/exercicios',
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/chat': typeof AppChatRoute
   '/exames': typeof AppExamesRoute
   '/exercicios': typeof AppExerciciosRoute
+  '/planos': typeof AppPlanosRoute
   '/testes': typeof AppTestesRoute
   '/trabalhos': typeof AppTrabalhosRoute
   '/api/chat': typeof ApiChatRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/chat': typeof AppChatRoute
   '/exames': typeof AppExamesRoute
   '/exercicios': typeof AppExerciciosRoute
+  '/planos': typeof AppPlanosRoute
   '/testes': typeof AppTestesRoute
   '/trabalhos': typeof AppTrabalhosRoute
   '/api/chat': typeof ApiChatRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/_app/chat': typeof AppChatRoute
   '/_app/exames': typeof AppExamesRoute
   '/_app/exercicios': typeof AppExerciciosRoute
+  '/_app/planos': typeof AppPlanosRoute
   '/_app/testes': typeof AppTestesRoute
   '/_app/trabalhos': typeof AppTrabalhosRoute
   '/api/chat': typeof ApiChatRoute
@@ -104,6 +113,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/exames'
     | '/exercicios'
+    | '/planos'
     | '/testes'
     | '/trabalhos'
     | '/api/chat'
@@ -114,6 +124,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/exames'
     | '/exercicios'
+    | '/planos'
     | '/testes'
     | '/trabalhos'
     | '/api/chat'
@@ -125,6 +136,7 @@ export interface FileRouteTypes {
     | '/_app/chat'
     | '/_app/exames'
     | '/_app/exercicios'
+    | '/_app/planos'
     | '/_app/testes'
     | '/_app/trabalhos'
     | '/api/chat'
@@ -181,6 +193,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTestesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/planos': {
+      id: '/_app/planos'
+      path: '/planos'
+      fullPath: '/planos'
+      preLoaderRoute: typeof AppPlanosRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/exercicios': {
       id: '/_app/exercicios'
       path: '/exercicios'
@@ -209,6 +228,7 @@ interface AppRouteChildren {
   AppChatRoute: typeof AppChatRoute
   AppExamesRoute: typeof AppExamesRoute
   AppExerciciosRoute: typeof AppExerciciosRoute
+  AppPlanosRoute: typeof AppPlanosRoute
   AppTestesRoute: typeof AppTestesRoute
   AppTrabalhosRoute: typeof AppTrabalhosRoute
 }
@@ -217,6 +237,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppChatRoute: AppChatRoute,
   AppExamesRoute: AppExamesRoute,
   AppExerciciosRoute: AppExerciciosRoute,
+  AppPlanosRoute: AppPlanosRoute,
   AppTestesRoute: AppTestesRoute,
   AppTrabalhosRoute: AppTrabalhosRoute,
 }
