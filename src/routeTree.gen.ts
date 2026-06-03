@@ -14,6 +14,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AppTrabalhosRouteImport } from './routes/_app.trabalhos'
+import { Route as AppExerciciosRouteImport } from './routes/_app.exercicios'
 import { Route as AppChatRouteImport } from './routes/_app.chat'
 
 const AuthRoute = AuthRouteImport.update({
@@ -40,6 +41,11 @@ const AppTrabalhosRoute = AppTrabalhosRouteImport.update({
   path: '/trabalhos',
   getParentRoute: () => AppRoute,
 } as any)
+const AppExerciciosRoute = AppExerciciosRouteImport.update({
+  id: '/exercicios',
+  path: '/exercicios',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppChatRoute = AppChatRouteImport.update({
   id: '/chat',
   path: '/chat',
@@ -50,6 +56,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/chat': typeof AppChatRoute
+  '/exercicios': typeof AppExerciciosRoute
   '/trabalhos': typeof AppTrabalhosRoute
   '/api/chat': typeof ApiChatRoute
 }
@@ -57,6 +64,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/chat': typeof AppChatRoute
+  '/exercicios': typeof AppExerciciosRoute
   '/trabalhos': typeof AppTrabalhosRoute
   '/api/chat': typeof ApiChatRoute
 }
@@ -66,20 +74,28 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
   '/_app/chat': typeof AppChatRoute
+  '/_app/exercicios': typeof AppExerciciosRoute
   '/_app/trabalhos': typeof AppTrabalhosRoute
   '/api/chat': typeof ApiChatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/chat' | '/trabalhos' | '/api/chat'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/chat'
+    | '/exercicios'
+    | '/trabalhos'
+    | '/api/chat'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/chat' | '/trabalhos' | '/api/chat'
+  to: '/' | '/auth' | '/chat' | '/exercicios' | '/trabalhos' | '/api/chat'
   id:
     | '__root__'
     | '/'
     | '/_app'
     | '/auth'
     | '/_app/chat'
+    | '/_app/exercicios'
     | '/_app/trabalhos'
     | '/api/chat'
   fileRoutesById: FileRoutesById
@@ -128,6 +144,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTrabalhosRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/exercicios': {
+      id: '/_app/exercicios'
+      path: '/exercicios'
+      fullPath: '/exercicios'
+      preLoaderRoute: typeof AppExerciciosRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/chat': {
       id: '/_app/chat'
       path: '/chat'
@@ -140,11 +163,13 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppChatRoute: typeof AppChatRoute
+  AppExerciciosRoute: typeof AppExerciciosRoute
   AppTrabalhosRoute: typeof AppTrabalhosRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppChatRoute: AppChatRoute,
+  AppExerciciosRoute: AppExerciciosRoute,
   AppTrabalhosRoute: AppTrabalhosRoute,
 }
 
