@@ -32,12 +32,12 @@ export const Route = createFileRoute("/api/chat")({
         }
 
         const { messages } = (await request.json()) as { messages: UIMessage[] };
-        const key = process.env.LOVABLE_API_KEY;
-        if (!key) return new Response("Missing LOVABLE_API_KEY", { status: 500 });
+        const key = process.env.OPENAI_API_KEY;
+        if (!key) return new Response("Missing OPENAI_API_KEY", { status: 500 });
 
-        const gateway = createLovableAiGatewayProvider(key);
+        const openai = createOpenAI({ apiKey: key });
         const result = streamText({
-          model: gateway("google/gemini-3-flash-preview"),
+          model: openai("gpt-4o-mini"),
           system: SYSTEM,
           messages: await convertToModelMessages(messages),
           onFinish: async ({ text }) => {
