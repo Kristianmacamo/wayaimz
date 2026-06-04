@@ -258,7 +258,7 @@ export type Database = {
       app_role: "admin" | "user"
       education_level: "secundario" | "superior"
       message_role: "user" | "assistant"
-      payment_method: "mpesa" | "paypal"
+      payment_method: "mpesa" | "paypal" | "stripe"
       payment_status: "pendente" | "aprovado" | "rejeitado"
       plan_tier: "free" | "basico" | "premium" | "completo"
     }
@@ -391,7 +391,7 @@ export const Constants = {
       app_role: ["admin", "user"],
       education_level: ["secundario", "superior"],
       message_role: ["user", "assistant"],
-      payment_method: ["mpesa", "paypal"],
+      payment_method: ["mpesa", "paypal", "stripe"],
       payment_status: ["pendente", "aprovado", "rejeitado"],
       plan_tier: ["free", "basico", "premium", "completo"],
     },
