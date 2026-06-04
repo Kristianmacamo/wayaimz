@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { createOpenAI } from "@ai-sdk/openai";
 import { createClient } from "@supabase/supabase-js";
 
 const SYSTEM = `És o Way Estudantes AI, um assistente académico para estudantes moçambicanos do ensino secundário e superior. Respondes em português de Moçambique, de forma clara, educativa e didática. Ajudas com trabalhos para casa, exercícios, pesquisas, resumos, explicações de matérias, testes, exames e trabalhos académicos. Quando resolves um exercício, mostras os passos. Usas Markdown.`;
