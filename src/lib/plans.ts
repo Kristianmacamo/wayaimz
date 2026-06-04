@@ -3,6 +3,7 @@ export const PLANS = {
     id: "free" as const,
     name: "Gratuito",
     price: 0,
+    priceUsd: 0,
     period: "",
     chatLimit: 2,
     features: ["2 conversas grátis com a IA"],
@@ -12,6 +13,7 @@ export const PLANS = {
     id: "basico" as const,
     name: "Básico",
     price: 65,
+    priceUsd: 1,
     period: "semana",
     chatLimit: null,
     features: ["Chat AI básico", "Respostas ilimitadas"],
@@ -21,6 +23,7 @@ export const PLANS = {
     id: "premium" as const,
     name: "Premium",
     price: 180,
+    priceUsd: 3,
     period: "semana",
     chatLimit: null,
     features: [
@@ -36,6 +39,7 @@ export const PLANS = {
     id: "completo" as const,
     name: "Completo",
     price: 300,
+    priceUsd: 5,
     period: "mês",
     chatLimit: null,
     features: [
@@ -55,7 +59,7 @@ export function planAllows(plan: PlanId, feature: "chat" | "exercicios" | "teste
   if (plan === "completo") return true;
   if (plan === "premium") return feature !== "exames" && feature !== "uploads";
   if (plan === "basico") return feature === "chat";
-  return feature === "chat"; // free: limited by chat count
+  return feature === "chat";
 }
 
 export const COMMISSION_RATE = 0.1;
