@@ -199,31 +199,6 @@ function PagamentosPage() {
         </TabsContent>
 
 
-        <TabsContent value="paypal">
-          <Card className="p-5">
-            <p className="text-sm">
-              1. Envie o valor equivalente a <strong>{selected.price} MT</strong> para a conta PayPal:
-            </p>
-            <div className="mt-3 flex items-center justify-between rounded-lg bg-muted px-4 py-3 font-mono text-sm">
-              <span>{PAYPAL_EMAIL}</span>
-              <button onClick={() => copy(PAYPAL_EMAIL)}>
-                <Copy className="h-4 w-4 text-primary" />
-              </button>
-            </div>
-            <p className="mt-4 text-sm">2. Cole abaixo o ID da transação PayPal:</p>
-            <div className="mt-2 space-y-2">
-              <Label>ID da transação PayPal</Label>
-              <Input
-                value={reference}
-                onChange={(e) => setReference(e.target.value)}
-                placeholder="Ex: 8XJ123456A7890123"
-              />
-            </div>
-            <Button onClick={submitManual} disabled={sending} className="mt-4 w-full">
-              {sending ? "A enviar..." : "Submeter para aprovação"}
-            </Button>
-          </Card>
-        </TabsContent>
 
         <TabsContent value="mpesa">
           <Card className="p-5 text-sm text-muted-foreground">
