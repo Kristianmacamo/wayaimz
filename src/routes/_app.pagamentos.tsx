@@ -59,35 +59,8 @@ function PagamentosPage() {
     }
   }
 
-  async function submitManual() {
-    if (!reference.trim()) {
-      toast.error("Indique a referência do pagamento");
-      return;
-    }
-    setSending(true);
-    const { data: u } = await supabase.auth.getUser();
-    if (!u.user) return;
-    const { error } = await supabase.from("payments").insert({
-      user_id: u.user.id,
-      plan: selected.id,
-      amount_mt: selected.price,
-      method: method as "paypal",
-      reference: reference.trim(),
-    });
-    setSending(false);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    toast.success("Pagamento submetido. Aguarde aprovação do administrador.");
-    setReference("");
-    qc.invalidateQueries({ queryKey: ["my-payments"] });
-  }
+  void paymentIdRef;
 
-  function copy(v: string) {
-    navigator.clipboard.writeText(v);
-    toast.success("Copiado!");
-  }
 
   return (
     <div className="mx-auto max-w-3xl p-6 md:p-10">
@@ -136,6 +109,70 @@ function PagamentosPage() {
           </TabsTrigger>
         </TabsList>
 
+        <TabsContent value="paypal">
+          <Card className="p-5">
+            <div className="flex items-start gap-3">
+              <Lock className="mt-1 h-5 w-5 text-primary" />
+              <div>
+                <p className="font-medium">Pagamento com PayPal</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Pague com a sua conta PayPal ou cartão. O plano é activado automaticamente após confirmação.
+                </p>
+              </div>
+            </div>
+            {ppCfg?.clientId && selected.id !== "free" ? (
+              <div className="mt-4">
+                <PayPalScriptProvider
+                  options={{ clientId: ppCfg.clientId, currency: "USD", intent: "capture" }}
+                >
+                  <PayPalButtons
+                    style={{ layout: "vertical", shape: "rect" }}
+                    disabled={sending}
+                    createOrder={async () => {
+                      setSending(true);
+                      try {
+                        const r = await createOrder({
+                          data: { plan: selected.id as "basico" | "premium" | "completo" },
+                        });
+                        setPaymentIdRef(r.paymentId);
+                        return r.orderId;
+                      } catch (e) {
+                        toast.error(e instanceof Error ? e.message : "Erro");
+                        setSending(false);
+                        throw e;
+                      }
+                    }}
+                    onApprove={async (data) => {
+                      try {
+                        await captureOrder({
+                          data: { orderId: data.orderID, paymentId: paymentIdRef! },
+                        });
+                        toast.success("Pagamento aprovado! Plano activado.");
+                        qc.invalidateQueries({ queryKey: ["my-payments"] });
+                        qc.invalidateQueries({ queryKey: ["my-profile"] });
+                      } catch (e) {
+                        toast.error(e instanceof Error ? e.message : "Erro a capturar");
+                      } finally {
+                        setSending(false);
+                      }
+                    }}
+                    onCancel={() => setSending(false)}
+                    onError={(err) => {
+                      toast.error(String(err));
+                      setSending(false);
+                    }}
+                  />
+                </PayPalScriptProvider>
+              </div>
+            ) : (
+              <p className="mt-4 text-sm text-muted-foreground">PayPal indisponível para este plano.</p>
+            )}
+            <p className="mt-2 text-xs text-muted-foreground">
+              Valor: ${selected.priceUsd} USD (≈ {selected.price} MT).
+            </p>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="stripe">
           <Card className="p-5">
             <div className="flex items-start gap-3">
@@ -160,6 +197,7 @@ function PagamentosPage() {
             </p>
           </Card>
         </TabsContent>
+
 
         <TabsContent value="paypal">
           <Card className="p-5">
