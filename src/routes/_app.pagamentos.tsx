@@ -3,15 +3,15 @@ import { useState } from "react";
 import { PLANS, type PlanId } from "@/lib/plans";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Smartphone, CreditCard, Copy, CheckCircle2, Lock } from "lucide-react";
+import { Smartphone, CreditCard, CheckCircle2, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { createStripeCheckout } from "@/lib/stripe.functions";
+import { createPaypalOrder, capturePaypalOrder, getPaypalClientId } from "@/lib/paypal.functions";
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/pagamentos")({
@@ -22,13 +22,15 @@ export const Route = createFileRoute("/_app/pagamentos")({
   }),
 });
 
-const PAYPAL_EMAIL = "wayestudantes@example.com";
+
 
 function PagamentosPage() {
   const { plan, status } = Route.useSearch();
   const qc = useQueryClient();
   const selected = PLANS[plan as PlanId] ?? PLANS.premium;
   const checkout = useServerFn(createStripeCheckout);
+  const createOrder = useServerFn(createPaypalOrder);
+  const captureOrder = useServerFn(capturePaypalOrder);
 
   const { data: payments } = useQuery({
     queryKey: ["my-payments"],
@@ -36,9 +38,14 @@ function PagamentosPage() {
       (await supabase.from("payments").select("*").order("created_at", { ascending: false })).data ?? [],
   });
 
-  const [reference, setReference] = useState("");
+  const { data: ppCfg } = useQuery({
+    queryKey: ["paypal-cfg"],
+    queryFn: async () => getPaypalClientId(),
+  });
+
   const [method, setMethod] = useState<"stripe" | "paypal" | "mpesa">("stripe");
   const [sending, setSending] = useState(false);
+  const [paymentIdRef, setPaymentIdRef] = useState<string | null>(null);
 
   async function payWithStripe() {
     if (selected.id === "free") return;
