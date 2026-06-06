@@ -43,9 +43,11 @@ export const PLANS = {
 
 export type PlanId = keyof typeof PLANS;
 
-export function planAllows(plan: PlanId, feature: "chat" | "pdf" | "images" | "priority") {
+export type Feature = "chat" | "pdf" | "images" | "priority" | "exercicios" | "testes" | "exames" | "uploads";
+
+export function planAllows(plan: PlanId, feature: Feature) {
   if (plan === "premium") return true;
-  if (plan === "basico") return feature === "chat" || feature === "pdf" || feature === "images";
+  if (plan === "basico") return feature !== "priority" && feature !== "exames" && feature !== "uploads";
   return feature === "chat";
 }
 
