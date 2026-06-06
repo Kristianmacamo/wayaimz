@@ -88,7 +88,7 @@ function LandingPage() {
             <p className="mt-2 text-muted-foreground">Escolha o plano que melhor se adequa ao seu estudo.</p>
           </div>
           <div className="grid gap-5 md:grid-cols-3">
-            {(["basico", "premium", "completo"] as const).map((id) => {
+            {(["free", "basico", "premium"] as const).map((id) => {
               const p = PLANS[id];
               const featured = id === "premium";
               return (
@@ -97,7 +97,7 @@ function LandingPage() {
                   <h3 className="font-display text-xl font-bold">{p.name}</h3>
                   <div className="mt-3"><span className="text-3xl font-extrabold">{p.price} MT</span><span className="text-muted-foreground"> / {p.period}</span></div>
                   <ul className="mt-5 space-y-2 text-sm">
-                    {p.features.map((f) => <li key={f} className="flex gap-2"><ShieldCheck className="h-4 w-4 text-success" /> {f}</li>)}
+                    {p.features.map((f: string) => <li key={f} className="flex gap-2"><ShieldCheck className="h-4 w-4 text-success" /> {f}</li>)}
                   </ul>
                   <Button asChild className={`mt-6 w-full ${featured ? "bg-gradient-hero" : ""}`} variant={featured ? "default" : "outline"}>
                     <Link to="/auth" search={{ mode: "signup" } as never}>Começar</Link>
