@@ -98,14 +98,17 @@ function PagamentosPage() {
 
       <Tabs value={method} onValueChange={(v) => setMethod(v as "stripe" | "paypal" | "mpesa")} className="mt-6">
         <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="mpesa">
+            <Smartphone className="mr-2 h-4 w-4" /> M-Pesa
+          </TabsTrigger>
           <TabsTrigger value="stripe">
             <CreditCard className="mr-2 h-4 w-4" /> Cartão (Visa)
           </TabsTrigger>
           <TabsTrigger value="paypal">
             <CreditCard className="mr-2 h-4 w-4" /> PayPal
           </TabsTrigger>
-          <TabsTrigger value="mpesa" disabled>
-            <Smartphone className="mr-2 h-4 w-4" /> M-Pesa
+          <TabsTrigger value="stripe">
+            <CreditCard className="mr-2 h-4 w-4" /> Cartão
           </TabsTrigger>
         </TabsList>
 
@@ -201,9 +204,7 @@ function PagamentosPage() {
 
 
         <TabsContent value="mpesa">
-          <Card className="p-5 text-sm text-muted-foreground">
-            Integração M-Pesa em breve. Use por agora o pagamento por cartão (Visa/Mastercard).
-          </Card>
+          <MpesaForm planId={selected.id} amount={selected.price} onSent={() => qc.invalidateQueries({ queryKey: ["my-payments"] })} />
         </TabsContent>
       </Tabs>
 
