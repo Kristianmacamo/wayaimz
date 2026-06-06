@@ -102,13 +102,10 @@ function PagamentosPage() {
             <Smartphone className="mr-2 h-4 w-4" /> M-Pesa
           </TabsTrigger>
           <TabsTrigger value="stripe">
-            <CreditCard className="mr-2 h-4 w-4" /> Cartão (Visa)
+            <CreditCard className="mr-2 h-4 w-4" /> Cartão
           </TabsTrigger>
           <TabsTrigger value="paypal">
             <CreditCard className="mr-2 h-4 w-4" /> PayPal
-          </TabsTrigger>
-          <TabsTrigger value="stripe">
-            <CreditCard className="mr-2 h-4 w-4" /> Cartão
           </TabsTrigger>
         </TabsList>
 
