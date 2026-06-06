@@ -266,7 +266,7 @@ function MpesaForm({ planId, amount, onSent }: { planId: PlanId; amount: number;
         transaction_code: code || null,
         proof_url: proofUrl,
         status: "pendente",
-      });
+      } as never);
       if (error) throw error;
       toast.success("Pedido enviado! Aguarde aprovação (até 24h).");
       setCode("");
