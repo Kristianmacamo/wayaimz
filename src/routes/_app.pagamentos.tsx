@@ -232,3 +232,105 @@ function PagamentosPage() {
     </div>
   );
 }
+
+const WHATSAPP_NUMBER = "258844772002";
+
+function MpesaForm({ planId, amount, onSent }: { planId: PlanId; amount: number; onSent: () => void }) {
+  const [code, setCode] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function submit() {
+    if (planId === "free") return;
+    if (!code && !file) {
+      toast.error("Indique o código da transação ou anexe o comprovativo.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) throw new Error("Sessão expirada");
+      let proofUrl: string | null = null;
+      if (file) {
+        const path = `${u.user.id}/${Date.now()}-${file.name}`;
+        const up = await supabase.storage.from("mpesa-proofs").upload(path, file);
+        if (up.error) throw up.error;
+        proofUrl = supabase.storage.from("mpesa-proofs").getPublicUrl(path).data.publicUrl;
+      }
+      const { error } = await supabase.from("payments").insert({
+        user_id: u.user.id,
+        plan: planId,
+        amount_mt: amount,
+        method: "mpesa",
+        reference: code || "comprovativo",
+        transaction_code: code || null,
+        proof_url: proofUrl,
+        status: "pendente",
+      });
+      if (error) throw error;
+      toast.success("Pedido enviado! Aguarde aprovação (até 24h).");
+      setCode("");
+      setFile(null);
+      onSent();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro ao enviar");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const message = encodeURIComponent(
+    `Já efetuei o pagamento via M-Pesa de ${amount} MT (Plano ${planId}). Segue em anexo o comprovativo ou o código da transação${code ? `: ${code}` : ""}. Peço a aprovação do meu pacote. Aguardarei a resposta da equipa de suporte. Prazo máximo de resposta: 24 horas.`
+  );
+
+  return (
+    <Card className="p-5 space-y-4">
+      <div>
+        <p className="font-medium">Pagamento por M-Pesa</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Envie <strong>{amount} MT</strong> para o número <strong>+258 84 477 2002</strong> (Way Estudantes). Depois cole o código da transação ou anexe o comprovativo abaixo.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Código da transação</label>
+        <input
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          placeholder="Ex: CGT4K2L9P0"
+          className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Ou anexe foto do comprovativo</label>
+        <input
+          type="file"
+          accept="image/*,application/pdf"
+          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          className="w-full text-sm"
+        />
+      </div>
+
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <Button onClick={submit} disabled={busy || planId === "free"} className="flex-1 bg-gradient-hero">
+          {busy ? "A enviar..." : "Solicitar aprovação"}
+        </Button>
+        <a
+          href={`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`}
+          target="_blank"
+          rel="noreferrer"
+          className="flex-1"
+        >
+          <Button variant="outline" className="w-full">
+            <Smartphone className="mr-2 h-4 w-4" /> Falar no WhatsApp
+          </Button>
+        </a>
+      </div>
+
+      <p className="text-xs text-muted-foreground">
+        Após confirmação manual (até 24h), os seus créditos são creditados automaticamente.
+      </p>
+    </Card>
+  );
+}
