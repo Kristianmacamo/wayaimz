@@ -42,10 +42,29 @@ function AdminPage() {
     qc.invalidateQueries();
   }
 
+  const approved = payments?.filter((p) => p.status === "aprovado") ?? [];
+  const totalRevenue = approved.reduce((s, p) => s + Number(p.amount_mt || 0), 0);
+  const totalCommissions = commissions?.reduce((s, c) => s + Number(c.amount_mt || 0), 0) ?? 0;
+  const totalProfit = totalRevenue - totalCommissions;
+
+  async function setCredits(userId: string, current: number) {
+    const v = window.prompt("Novos créditos:", String(current));
+    if (v === null) return;
+    const n = parseInt(v, 10);
+    if (Number.isNaN(n) || n < 0) return toast.error("Valor inválido");
+    await call("admin_set_credits", { _user_id: userId, _credits: n }, "Créditos actualizados");
+  }
+
   return (
     <div className="mx-auto max-w-6xl p-6 md:p-10">
       <h1 className="font-display text-3xl font-bold">Painel de Administração</h1>
-      <p className="mt-1 text-muted-foreground">Gerir pagamentos, utilizadores e comissões.</p>
+      <p className="mt-1 text-muted-foreground">Gerir pagamentos, utilizadores, créditos e comissões.</p>
+
+      <div className="mt-6 grid gap-3 sm:grid-cols-3">
+        <Card className="p-4"><p className="text-xs text-muted-foreground">Receita aprovada</p><p className="mt-1 text-2xl font-bold">{totalRevenue.toFixed(0)} MT</p></Card>
+        <Card className="p-4"><p className="text-xs text-muted-foreground">Comissões afiliados</p><p className="mt-1 text-2xl font-bold">{totalCommissions.toFixed(0)} MT</p></Card>
+        <Card className="p-4"><p className="text-xs text-muted-foreground">Lucro líquido</p><p className="mt-1 text-2xl font-bold text-primary">{totalProfit.toFixed(0)} MT</p></Card>
+      </div>
 
       <Tabs defaultValue="payments" className="mt-6">
         <TabsList>
@@ -57,12 +76,15 @@ function AdminPage() {
         <TabsContent value="payments" className="space-y-2">
           {payments?.map((p) => {
             const u = users?.find((x) => x.id === p.user_id);
+            const pAny = p as unknown as { transaction_code?: string; proof_url?: string };
             return (
               <Card key={p.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
                 <div>
                   <p className="font-semibold capitalize">{p.plan} — {p.amount_mt} MT</p>
                   <p className="text-xs text-muted-foreground">{u ? `${u.nome} ${u.apelido} (${u.email})` : p.user_id}</p>
                   <p className="text-xs text-muted-foreground">{p.method.toUpperCase()} · Ref: {p.reference} · {new Date(p.created_at).toLocaleString("pt-PT")}</p>
+                  {pAny.transaction_code && <p className="text-xs">Código: <span className="font-mono">{pAny.transaction_code}</span></p>}
+                  {pAny.proof_url && <a href={pAny.proof_url} target="_blank" rel="noreferrer" className="text-xs text-primary underline">Ver comprovativo</a>}
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant={p.status === "aprovado" ? "default" : p.status === "rejeitado" ? "destructive" : "secondary"}>{p.status}</Badge>
@@ -80,22 +102,26 @@ function AdminPage() {
         </TabsContent>
 
         <TabsContent value="users" className="space-y-2">
-          {users?.map((u) => (
-            <Card key={u.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
-              <div>
-                <p className="font-semibold">{u.emoji ?? "🎓"} {u.nome} {u.apelido}</p>
-                <p className="text-xs text-muted-foreground">{u.email} · {u.telefone} · {u.nivel}</p>
-                <p className="text-xs">Plano: <span className="font-medium text-primary capitalize">{u.current_plan}</span> · Cód: <span className="font-mono">{u.affiliate_code}</span></p>
-              </div>
-              <div className="flex items-center gap-2">
-                {u.suspended && <Badge variant="destructive">Suspenso</Badge>}
-                <Button size="sm" variant={u.suspended ? "default" : "outline"}
-                  onClick={() => call("toggle_user_suspension", { _user_id: u.id, _suspended: !u.suspended }, u.suspended ? "Reativado" : "Suspenso")}>
-                  {u.suspended ? <><RefreshCw className="mr-1 h-4 w-4" />Reativar</> : <><Ban className="mr-1 h-4 w-4" />Suspender</>}
-                </Button>
-              </div>
-            </Card>
-          ))}
+          {users?.map((u) => {
+            const uAny = u as unknown as { credits?: number };
+            return (
+              <Card key={u.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
+                <div>
+                  <p className="font-semibold">{u.emoji ?? "🎓"} {u.nome} {u.apelido}</p>
+                  <p className="text-xs text-muted-foreground">{u.email} · {u.telefone} · {u.nivel}</p>
+                  <p className="text-xs">Plano: <span className="font-medium text-primary capitalize">{u.current_plan}</span> · Créditos: <strong>{uAny.credits ?? 0}</strong> · Cód: <span className="font-mono">{u.affiliate_code}</span></p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {u.suspended && <Badge variant="destructive">Suspenso</Badge>}
+                  <Button size="sm" variant="outline" onClick={() => setCredits(u.id, uAny.credits ?? 0)}>Créditos</Button>
+                  <Button size="sm" variant={u.suspended ? "default" : "outline"}
+                    onClick={() => call("toggle_user_suspension", { _user_id: u.id, _suspended: !u.suspended }, u.suspended ? "Reativado" : "Suspenso")}>
+                    {u.suspended ? <><RefreshCw className="mr-1 h-4 w-4" />Reativar</> : <><Ban className="mr-1 h-4 w-4" />Suspender</>}
+                  </Button>
+                </div>
+              </Card>
+            );
+          })}
         </TabsContent>
 
         <TabsContent value="commissions" className="space-y-2">

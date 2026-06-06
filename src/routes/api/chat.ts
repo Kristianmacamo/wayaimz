@@ -21,14 +21,14 @@ export const Route = createFileRoute("/api/chat")({
         if (cerr || !claims?.claims?.sub) return new Response("Unauthorized", { status: 401 });
         const userId = claims.claims.sub as string;
 
-        // Check profile & plan
-        const { data: profile } = await supabase.from("profiles").select("current_plan, plan_expires_at, free_chats_used, suspended").eq("id", userId).maybeSingle();
+        // Check profile, plan & credits
+        const { data: profile } = await supabase.from("profiles").select("current_plan, plan_expires_at, credits, suspended").eq("id", userId).maybeSingle();
         if (!profile) return new Response("Profile not found", { status: 404 });
         if (profile.suspended) return new Response("Account suspended", { status: 403 });
 
-        const planActive = profile.current_plan !== "free" && (!profile.plan_expires_at || new Date(profile.plan_expires_at) > new Date());
-        if (!planActive && profile.free_chats_used >= 2) {
-          return new Response(JSON.stringify({ error: "limit", message: "Atingiu o limite de 2 conversas grátis. Adquira um plano para continuar." }), { status: 402, headers: { "content-type": "application/json" } });
+        const credits = profile.credits ?? 0;
+        if (credits <= 0) {
+          return new Response(JSON.stringify({ error: "no_credits", message: "Sem créditos. Adquira um plano para continuar." }), { status: 402, headers: { "content-type": "application/json" } });
         }
 
         const { messages } = (await request.json()) as { messages: UIMessage[] };
@@ -42,7 +42,6 @@ export const Route = createFileRoute("/api/chat")({
           messages: await convertToModelMessages(messages),
           onFinish: async ({ text }) => {
             try {
-              // ensure conversation exists
               let { data: conv } = await supabase.from("conversations").select("id").eq("user_id", userId).maybeSingle();
               if (!conv) {
                 const { data: created } = await supabase.from("conversations").insert({ user_id: userId }).select("id").single();
@@ -55,9 +54,7 @@ export const Route = createFileRoute("/api/chat")({
                 { conversation_id: conv.id, user_id: userId, role: "user", content: userText },
                 { conversation_id: conv.id, user_id: userId, role: "assistant", content: text },
               ]);
-              if (!planActive) {
-                await supabase.from("profiles").update({ free_chats_used: profile.free_chats_used + 1 }).eq("id", userId);
-              }
+              await supabase.from("profiles").update({ credits: credits - 1 }).eq("id", userId);
             } catch (e) { console.error("persist error", e); }
           },
         });

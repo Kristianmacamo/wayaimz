@@ -5,49 +5,37 @@ export const PLANS = {
     price: 0,
     priceUsd: 0,
     period: "",
-    chatLimit: 2,
-    features: ["2 conversas grátis com a IA"],
-    notIncluded: [],
+    credits: 100,
+    features: ["100 créditos para começar", "Chat AI básico"],
+    notIncluded: ["Suporte prioritário", "Download de PDF", "Download de imagens premium"],
   },
   basico: {
     id: "basico" as const,
     name: "Básico",
     price: 65,
     priceUsd: 1,
-    period: "semana",
-    chatLimit: null,
-    features: ["Chat AI básico", "Respostas ilimitadas"],
-    notIncluded: ["Resolução de exercícios", "Testes", "Exames", "Download de PDF"],
+    period: "mês",
+    credits: 500,
+    features: [
+      "500 créditos por mês",
+      "Funcionalidades básicas",
+      "Download de PDF",
+      "Download de imagens",
+    ],
+    notIncluded: ["Suporte prioritário"],
   },
   premium: {
     id: "premium" as const,
     name: "Premium",
-    price: 180,
-    priceUsd: 3,
-    period: "semana",
-    chatLimit: null,
-    features: [
-      "Tudo do Básico",
-      "Resolução de exercícios",
-      "Respostas para testes",
-      "Download de PDF",
-      "Trabalhos académicos",
-    ],
-    notIncluded: ["Suporte humano", "Exames completos", "Envio de ficheiros"],
-  },
-  completo: {
-    id: "completo" as const,
-    name: "Completo",
-    price: 300,
+    price: 299,
     priceUsd: 5,
     period: "mês",
-    chatLimit: null,
+    credits: 2500,
     features: [
-      "Tudo do Premium",
-      "Suporte humano",
-      "Testes e Exames completos",
-      "Upload de fotos e ficheiros",
-      "Assistente AI avançado",
+      "2.500 créditos por mês",
+      "Suporte prioritário",
+      "Download de PDF e imagens",
+      "Todas as funcionalidades desbloqueadas",
     ],
     notIncluded: [],
   },
@@ -55,10 +43,11 @@ export const PLANS = {
 
 export type PlanId = keyof typeof PLANS;
 
-export function planAllows(plan: PlanId, feature: "chat" | "exercicios" | "testes" | "exames" | "pdf" | "uploads") {
-  if (plan === "completo") return true;
-  if (plan === "premium") return feature !== "exames" && feature !== "uploads";
-  if (plan === "basico") return feature === "chat";
+export type Feature = "chat" | "pdf" | "images" | "priority" | "exercicios" | "testes" | "exames" | "uploads";
+
+export function planAllows(plan: PlanId, feature: Feature) {
+  if (plan === "premium") return true;
+  if (plan === "basico") return feature !== "priority" && feature !== "exames" && feature !== "uploads";
   return feature === "chat";
 }
 
