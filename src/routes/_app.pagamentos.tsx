@@ -43,7 +43,7 @@ function PagamentosPage() {
     queryFn: async () => getPaypalClientId(),
   });
 
-  const [method, setMethod] = useState<"stripe" | "paypal" | "mpesa">("stripe");
+  const [method, setMethod] = useState<"stripe" | "paypal" | "mpesa">("mpesa");
   const [sending, setSending] = useState(false);
   const [paymentIdRef, setPaymentIdRef] = useState<string | null>(null);
 
