@@ -3,15 +3,12 @@ import { useState } from "react";
 import { PLANS, type PlanId } from "@/lib/plans";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Smartphone, CreditCard, CheckCircle2, Lock } from "lucide-react";
+import { Smartphone, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { createStripeCheckout } from "@/lib/stripe.functions";
-import { createPaypalOrder, capturePaypalOrder, getPaypalClientId } from "@/lib/paypal.functions";
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import { notifyAdminPayment } from "@/lib/notify.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/pagamentos")({
