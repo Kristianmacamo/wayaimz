@@ -153,6 +153,7 @@ export type Database = {
           apelido: string
           avatar_url: string | null
           created_at: string
+          credits: number
           current_plan: Database["public"]["Enums"]["plan_tier"]
           email: string
           emoji: string | null
@@ -171,6 +172,7 @@ export type Database = {
           apelido: string
           avatar_url?: string | null
           created_at?: string
+          credits?: number
           current_plan?: Database["public"]["Enums"]["plan_tier"]
           email: string
           emoji?: string | null
@@ -189,6 +191,7 @@ export type Database = {
           apelido?: string
           avatar_url?: string | null
           created_at?: string
+          credits?: number
           current_plan?: Database["public"]["Enums"]["plan_tier"]
           email?: string
           emoji?: string | null
