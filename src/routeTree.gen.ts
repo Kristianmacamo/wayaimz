@@ -24,7 +24,6 @@ import { Route as AppExamesRouteImport } from './routes/_app.exames'
 import { Route as AppChatRouteImport } from './routes/_app.chat'
 import { Route as AppAfiliadosRouteImport } from './routes/_app.afiliados'
 import { Route as AppAdminRouteImport } from './routes/_app.admin'
-import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -100,11 +99,6 @@ const AppAdminRoute = AppAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
-const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
-  id: '/api/public/stripe-webhook',
-  path: '/api/public/stripe-webhook',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -121,7 +115,6 @@ export interface FileRoutesByFullPath {
   '/testes': typeof AppTestesRoute
   '/trabalhos': typeof AppTrabalhosRoute
   '/api/chat': typeof ApiChatRoute
-  '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -138,7 +131,6 @@ export interface FileRoutesByTo {
   '/testes': typeof AppTestesRoute
   '/trabalhos': typeof AppTrabalhosRoute
   '/api/chat': typeof ApiChatRoute
-  '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -157,7 +149,6 @@ export interface FileRoutesById {
   '/_app/testes': typeof AppTestesRoute
   '/_app/trabalhos': typeof AppTrabalhosRoute
   '/api/chat': typeof ApiChatRoute
-  '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -176,7 +167,6 @@ export interface FileRouteTypes {
     | '/testes'
     | '/trabalhos'
     | '/api/chat'
-    | '/api/public/stripe-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -193,7 +183,6 @@ export interface FileRouteTypes {
     | '/testes'
     | '/trabalhos'
     | '/api/chat'
-    | '/api/public/stripe-webhook'
   id:
     | '__root__'
     | '/'
@@ -211,7 +200,6 @@ export interface FileRouteTypes {
     | '/_app/testes'
     | '/_app/trabalhos'
     | '/api/chat'
-    | '/api/public/stripe-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -219,7 +207,6 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRoute
   ApiChatRoute: typeof ApiChatRoute
-  ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -329,13 +316,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
-    '/api/public/stripe-webhook': {
-      id: '/api/public/stripe-webhook'
-      path: '/api/public/stripe-webhook'
-      fullPath: '/api/public/stripe-webhook'
-      preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -374,8 +354,17 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRoute,
   ApiChatRoute: ApiChatRoute,
-  ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
