@@ -15,19 +15,15 @@ export const Route = createFileRoute("/_app/pagamentos")({
   component: PagamentosPage,
   validateSearch: (s: Record<string, unknown>) => ({
     plan: (typeof s.plan === "string" ? s.plan : "premium") as PlanId,
-    status: typeof s.status === "string" ? s.status : undefined,
   }),
 });
 
-
+const WHATSAPP_NUMBER = "258844772002";
 
 function PagamentosPage() {
-  const { plan, status } = Route.useSearch();
+  const { plan } = Route.useSearch();
   const qc = useQueryClient();
   const selected = PLANS[plan as PlanId] ?? PLANS.premium;
-  const checkout = useServerFn(createStripeCheckout);
-  const createOrder = useServerFn(createPaypalOrder);
-  const captureOrder = useServerFn(capturePaypalOrder);
 
   const { data: payments } = useQuery({
     queryKey: ["my-payments"],
@@ -35,45 +31,12 @@ function PagamentosPage() {
       (await supabase.from("payments").select("*").order("created_at", { ascending: false })).data ?? [],
   });
 
-  const { data: ppCfg } = useQuery({
-    queryKey: ["paypal-cfg"],
-    queryFn: async () => getPaypalClientId(),
-  });
-
-  const [method, setMethod] = useState<"stripe" | "paypal" | "mpesa">("mpesa");
-  const [sending, setSending] = useState(false);
-  const [paymentIdRef, setPaymentIdRef] = useState<string | null>(null);
-
-  async function payWithStripe() {
-    if (selected.id === "free") return;
-    setSending(true);
-    try {
-      const res = await checkout({ data: { plan: selected.id as "basico" | "premium" | "completo" } });
-      window.location.href = res.url;
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Erro ao iniciar pagamento");
-      setSending(false);
-    }
-  }
-
-  void paymentIdRef;
-
-
   return (
     <div className="mx-auto max-w-3xl p-6 md:p-10">
-      <h1 className="font-display text-3xl font-bold">Pagamento</h1>
-      <p className="mt-1 text-muted-foreground">Pague de forma segura e ative o seu plano automaticamente.</p>
-
-      {status === "success" && (
-        <Card className="mt-4 border-green-500/40 bg-green-500/5 p-4 text-sm">
-          ✅ Pagamento recebido! O seu plano será activado em segundos. Recarregue a página se não aparecer.
-        </Card>
-      )}
-      {status === "cancel" && (
-        <Card className="mt-4 border-yellow-500/40 bg-yellow-500/5 p-4 text-sm">
-          Pagamento cancelado. Pode tentar novamente quando quiser.
-        </Card>
-      )}
+      <h1 className="font-display text-3xl font-bold">Pagamento via M-Pesa</h1>
+      <p className="mt-1 text-muted-foreground">
+        Pagamento manual e seguro. Após confirmação (até 24h), o seu plano é activado automaticamente.
+      </p>
 
       <Card className="mt-6 border-primary/30 bg-gradient-card p-5">
         <div className="flex items-center justify-between">
@@ -83,9 +46,7 @@ function PagamentosPage() {
           </div>
           <div className="text-right">
             <p className="text-2xl font-bold">{selected.price} MT</p>
-            <p className="text-xs text-muted-foreground">
-              ≈ ${selected.priceUsd} {selected.period && `· ${selected.period}`}
-            </p>
+            {selected.period && <p className="text-xs text-muted-foreground">{selected.period}</p>}
           </div>
         </div>
         <Link to="/planos" className="mt-3 inline-block text-sm text-primary hover:underline">
@@ -93,114 +54,9 @@ function PagamentosPage() {
         </Link>
       </Card>
 
-      <Tabs value={method} onValueChange={(v) => setMethod(v as "stripe" | "paypal" | "mpesa")} className="mt-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="mpesa">
-            <Smartphone className="mr-2 h-4 w-4" /> M-Pesa
-          </TabsTrigger>
-          <TabsTrigger value="stripe">
-            <CreditCard className="mr-2 h-4 w-4" /> Cartão
-          </TabsTrigger>
-          <TabsTrigger value="paypal">
-            <CreditCard className="mr-2 h-4 w-4" /> PayPal
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="paypal">
-          <Card className="p-5">
-            <div className="flex items-start gap-3">
-              <Lock className="mt-1 h-5 w-5 text-primary" />
-              <div>
-                <p className="font-medium">Pagamento com PayPal</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Pague com a sua conta PayPal ou cartão. O plano é activado automaticamente após confirmação.
-                </p>
-              </div>
-            </div>
-            {ppCfg?.clientId && selected.id !== "free" ? (
-              <div className="mt-4">
-                <PayPalScriptProvider
-                  options={{ clientId: ppCfg.clientId, currency: "USD", intent: "capture" }}
-                >
-                  <PayPalButtons
-                    style={{ layout: "vertical", shape: "rect" }}
-                    disabled={sending}
-                    createOrder={async () => {
-                      setSending(true);
-                      try {
-                        const r = await createOrder({
-                          data: { plan: selected.id as "basico" | "premium" | "completo" },
-                        });
-                        setPaymentIdRef(r.paymentId);
-                        return r.orderId;
-                      } catch (e) {
-                        toast.error(e instanceof Error ? e.message : "Erro");
-                        setSending(false);
-                        throw e;
-                      }
-                    }}
-                    onApprove={async (data) => {
-                      try {
-                        await captureOrder({
-                          data: { orderId: data.orderID, paymentId: paymentIdRef! },
-                        });
-                        toast.success("Pagamento aprovado! Plano activado.");
-                        qc.invalidateQueries({ queryKey: ["my-payments"] });
-                        qc.invalidateQueries({ queryKey: ["my-profile"] });
-                      } catch (e) {
-                        toast.error(e instanceof Error ? e.message : "Erro a capturar");
-                      } finally {
-                        setSending(false);
-                      }
-                    }}
-                    onCancel={() => setSending(false)}
-                    onError={(err) => {
-                      toast.error(String(err));
-                      setSending(false);
-                    }}
-                  />
-                </PayPalScriptProvider>
-              </div>
-            ) : (
-              <p className="mt-4 text-sm text-muted-foreground">PayPal indisponível para este plano.</p>
-            )}
-            <p className="mt-2 text-xs text-muted-foreground">
-              Valor: ${selected.priceUsd} USD (≈ {selected.price} MT).
-            </p>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="stripe">
-          <Card className="p-5">
-            <div className="flex items-start gap-3">
-              <Lock className="mt-1 h-5 w-5 text-primary" />
-              <div>
-                <p className="font-medium">Pagamento seguro com Visa / Mastercard</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Será redirecionado para o checkout seguro do Stripe. Após a confirmação, o seu plano é activado
-                  automaticamente.
-                </p>
-              </div>
-            </div>
-            <Button
-              onClick={payWithStripe}
-              disabled={sending || selected.id === "free"}
-              className="mt-4 w-full bg-gradient-hero"
-            >
-              {sending ? "A redireccionar..." : `Pagar $${selected.priceUsd} com cartão`}
-            </Button>
-            <p className="mt-2 text-xs text-muted-foreground">
-              Valor em dólares (Stripe não suporta MZN). 1 USD ≈ 64 MT.
-            </p>
-          </Card>
-        </TabsContent>
-
-
-
-        <TabsContent value="mpesa">
-          <MpesaForm planId={selected.id} amount={selected.price} onSent={() => qc.invalidateQueries({ queryKey: ["my-payments"] })} />
-        </TabsContent>
-      </Tabs>
+      <div className="mt-6">
+        <MpesaForm planId={selected.id} amount={selected.price} onSent={() => qc.invalidateQueries({ queryKey: ["my-payments"] })} />
+      </div>
 
       <h2 className="mt-10 font-display text-xl font-bold">Meus pagamentos</h2>
       <div className="mt-3 space-y-2">
@@ -230,12 +86,11 @@ function PagamentosPage() {
   );
 }
 
-const WHATSAPP_NUMBER = "258844772002";
-
 function MpesaForm({ planId, amount, onSent }: { planId: PlanId; amount: number; onSent: () => void }) {
   const [code, setCode] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
+  const notify = useServerFn(notifyAdminPayment);
 
   async function submit() {
     if (planId === "free") return;
@@ -254,17 +109,38 @@ function MpesaForm({ planId, amount, onSent }: { planId: PlanId; amount: number;
         if (up.error) throw up.error;
         proofUrl = supabase.storage.from("mpesa-proofs").getPublicUrl(path).data.publicUrl;
       }
-      const { error } = await supabase.from("payments").insert({
-        user_id: u.user.id,
-        plan: planId,
-        amount_mt: amount,
-        method: "mpesa",
-        reference: code || "comprovativo",
-        transaction_code: code || null,
-        proof_url: proofUrl,
-        status: "pendente",
-      } as never);
+      const { data: inserted, error } = await supabase
+        .from("payments")
+        .insert({
+          user_id: u.user.id,
+          plan: planId,
+          amount_mt: amount,
+          method: "mpesa",
+          reference: code || "comprovativo",
+          transaction_code: code || null,
+          proof_url: proofUrl,
+          status: "pendente",
+        } as never)
+        .select()
+        .single();
       if (error) throw error;
+
+      // Notificar admin por email (não bloqueia)
+      try {
+        await notify({
+          data: {
+            paymentId: (inserted as { id: string }).id,
+            plan: planId,
+            amount,
+            transactionCode: code || null,
+            proofUrl,
+            userEmail: u.user.email ?? "",
+          },
+        });
+      } catch (e) {
+        console.warn("Notify admin failed", e);
+      }
+
       toast.success("Pedido enviado! Aguarde aprovação (até 24h).");
       setCode("");
       setFile(null);
@@ -277,20 +153,22 @@ function MpesaForm({ planId, amount, onSent }: { planId: PlanId; amount: number;
   }
 
   const message = encodeURIComponent(
-    `Já efetuei o pagamento via M-Pesa de ${amount} MT (Plano ${planId}). Segue em anexo o comprovativo ou o código da transação${code ? `: ${code}` : ""}. Peço a aprovação do meu pacote. Aguardarei a resposta da equipa de suporte. Prazo máximo de resposta: 24 horas.`
+    `Já efetuei o pagamento via M-Pesa de ${amount} MT (Plano ${planId}). Segue em anexo o comprovativo ou o código da transação${code ? `: ${code}` : ""}. Peço a aprovação do meu pacote.`
   );
 
   return (
     <Card className="p-5 space-y-4">
       <div>
-        <p className="font-medium">Pagamento por M-Pesa</p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Envie <strong>{amount} MT</strong> para o número <strong>+258 84 477 2002</strong> (Way Estudantes). Depois cole o código da transação ou anexe o comprovativo abaixo.
-        </p>
+        <p className="font-medium">Como pagar</p>
+        <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
+          <li>Envie <strong>{amount} MT</strong> via M-Pesa para <strong>+258 84 477 2002</strong> (Way Estudantes).</li>
+          <li>Cole abaixo o código da transação <em>ou</em> anexe a foto do comprovativo.</li>
+          <li>Clique em <strong>Solicitar aprovação</strong>. Será notificado quando os créditos forem activados.</li>
+        </ol>
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Código da transação</label>
+        <label className="text-sm font-medium">Código da transação M-Pesa</label>
         <input
           value={code}
           onChange={(e) => setCode(e.target.value)}
@@ -326,7 +204,7 @@ function MpesaForm({ planId, amount, onSent }: { planId: PlanId; amount: number;
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Após confirmação manual (até 24h), os seus créditos são creditados automaticamente.
+        O administrador é notificado por email assim que submeter o pedido.
       </p>
     </Card>
   );
