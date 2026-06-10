@@ -120,7 +120,13 @@ function ChatPage() {
             </div>
           )}
 
-          {messages.map((m) => {
+          {messages
+            .filter((m) => {
+              if (!searchTerm) return true;
+              const txt = m.parts.map((p) => (p.type === "text" ? p.text : "")).join("");
+              return txt.toLowerCase().includes(searchTerm.toLowerCase());
+            })
+            .map((m) => {
             const text = m.parts.map((p) => (p.type === "text" ? p.text : "")).join("");
             const isUser = m.role === "user";
             return (
