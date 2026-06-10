@@ -18,12 +18,7 @@ export const Route = createFileRoute("/_app/chat")({
 function ChatPage() {
   const { start } = Route.useSearch();
   const [input, setInput] = useState(start ?? "");
-  const [token, setToken] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setToken(data.session?.access_token ?? null));
-  }, []);
 
   const { data: history } = useQuery({
     queryKey: ["history"],
@@ -35,11 +30,19 @@ function ChatPage() {
     },
   });
 
-  const { messages, sendMessage, status, setMessages } = useChat({
-    transport: new DefaultChatTransport({
+  const transportRef = useRef(
+    new DefaultChatTransport({
       api: "/api/chat",
-      headers: (): Record<string, string> => (token ? { Authorization: `Bearer ${token}` } : {}),
-    }),
+      headers: async (): Promise<Record<string, string>> => {
+        const { data } = await supabase.auth.getSession();
+        const t = data.session?.access_token;
+        return t ? { Authorization: `Bearer ${t}` } : {};
+      },
+    })
+  );
+
+  const { messages, sendMessage, status, setMessages } = useChat({
+    transport: transportRef.current,
     onError: (e) => toast.error(e.message || "Erro na conversa"),
   });
 
@@ -58,7 +61,7 @@ function ChatPage() {
   const loading = status === "submitted" || status === "streaming";
 
   async function onSend() {
-    if (!input.trim() || loading || !token) return;
+    if (!input.trim() || loading) return;
     const text = input.trim();
     setInput("");
     try {
