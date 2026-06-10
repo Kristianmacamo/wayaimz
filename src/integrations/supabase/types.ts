@@ -117,8 +117,10 @@ export type Database = {
           id: string
           method: Database["public"]["Enums"]["payment_method"]
           plan: Database["public"]["Enums"]["plan_tier"]
+          proof_url: string | null
           reference: string | null
           status: Database["public"]["Enums"]["payment_status"]
+          transaction_code: string | null
           user_id: string
         }
         Insert: {
@@ -129,8 +131,10 @@ export type Database = {
           id?: string
           method: Database["public"]["Enums"]["payment_method"]
           plan: Database["public"]["Enums"]["plan_tier"]
+          proof_url?: string | null
           reference?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
+          transaction_code?: string | null
           user_id: string
         }
         Update: {
@@ -141,8 +145,10 @@ export type Database = {
           id?: string
           method?: Database["public"]["Enums"]["payment_method"]
           plan?: Database["public"]["Enums"]["plan_tier"]
+          proof_url?: string | null
           reference?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
+          transaction_code?: string | null
           user_id?: string
         }
         Relationships: []
