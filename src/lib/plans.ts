@@ -18,11 +18,11 @@ export const PLANS = {
     credits: 500,
     features: [
       "500 créditos por mês",
-      "Funcionalidades básicas",
-      "Download de PDF",
-      "Download de imagens",
+      "Carregar imagens no chat",
+      "Tirar fotografias para enviar ao AI",
+      "Histórico e busca de conversas",
     ],
-    notIncluded: ["Suporte prioritário"],
+    notIncluded: ["Download de PDF", "Suporte prioritário"],
   },
   premium: {
     id: "premium" as const,
@@ -33,8 +33,10 @@ export const PLANS = {
     credits: 2500,
     features: [
       "2.500 créditos por mês",
+      "Carregar imagens no chat",
+      "Tirar fotografias para enviar ao AI",
+      "Baixar respostas em PDF",
       "Suporte prioritário",
-      "Download de PDF e imagens",
       "Todas as funcionalidades desbloqueadas",
     ],
     notIncluded: [],
