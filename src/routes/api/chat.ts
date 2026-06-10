@@ -17,9 +17,9 @@ export const Route = createFileRoute("/api/chat")({
           global: { headers: { Authorization: `Bearer ${token}` } },
           auth: { persistSession: false, autoRefreshToken: false },
         });
-        const { data: claims, error: cerr } = await supabase.auth.getClaims(token);
-        if (cerr || !claims?.claims?.sub) return new Response("Unauthorized", { status: 401 });
-        const userId = claims.claims.sub as string;
+        const { data: userData, error: uerr } = await supabase.auth.getUser(token);
+        if (uerr || !userData?.user) return new Response("Unauthorized", { status: 401 });
+        const userId = userData.user.id;
 
         // Check profile, plan & credits
         const { data: profile } = await supabase.from("profiles").select("current_plan, plan_expires_at, credits, suspended").eq("id", userId).maybeSingle();
