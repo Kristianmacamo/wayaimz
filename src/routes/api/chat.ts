@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
+import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 import { createClient } from "@supabase/supabase-js";
 
 const SYSTEM = `És o Way Estudantes AI, um assistente académico para estudantes moçambicanos do ensino secundário e superior. Respondes em português de Moçambique, de forma clara, educativa e didática. Ajudas com trabalhos para casa, exercícios, pesquisas, resumos, explicações de matérias, testes, exames e trabalhos académicos. Quando resolves um exercício, mostras os passos. Usas Markdown.`;
@@ -32,12 +32,12 @@ export const Route = createFileRoute("/api/chat")({
         }
 
         const { messages } = (await request.json()) as { messages: UIMessage[] };
-        const key = process.env.OPENAI_API_KEY;
-        if (!key) return new Response("Missing OPENAI_API_KEY", { status: 500 });
+        const key = process.env.LOVABLE_API_KEY;
+        if (!key) return new Response("Missing LOVABLE_API_KEY", { status: 500 });
 
-        const openai = createOpenAI({ apiKey: key });
+        const gateway = createLovableAiGatewayProvider(key);
         const result = streamText({
-          model: openai("gpt-4o-mini"),
+          model: gateway("google/gemini-3-flash-preview"),
           system: SYSTEM,
           messages: await convertToModelMessages(messages),
           onFinish: async ({ text }) => {
