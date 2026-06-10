@@ -61,7 +61,7 @@ function ChatPage() {
   const loading = status === "submitted" || status === "streaming";
 
   async function onSend() {
-    if (!input.trim() || loading || !token) return;
+    if (!input.trim() || loading) return;
     const text = input.trim();
     setInput("");
     try {
