@@ -22,8 +22,10 @@ import { Route as AppPagamentosRouteImport } from './routes/_app.pagamentos'
 import { Route as AppMatematicaRouteImport } from './routes/_app.matematica'
 import { Route as AppInicioRouteImport } from './routes/_app.inicio'
 import { Route as AppFormulasRouteImport } from './routes/_app.formulas'
+import { Route as AppExplicacoesRouteImport } from './routes/_app.explicacoes'
 import { Route as AppExerciciosRouteImport } from './routes/_app.exercicios'
 import { Route as AppExamesRouteImport } from './routes/_app.exames'
+import { Route as AppConfiguracoesRouteImport } from './routes/_app.configuracoes'
 import { Route as AppChatRouteImport } from './routes/_app.chat'
 import { Route as AppAfiliadosRouteImport } from './routes/_app.afiliados'
 import { Route as AppAdminRouteImport } from './routes/_app.admin'
@@ -92,6 +94,11 @@ const AppFormulasRoute = AppFormulasRouteImport.update({
   path: '/formulas',
   getParentRoute: () => AppRoute,
 } as any)
+const AppExplicacoesRoute = AppExplicacoesRouteImport.update({
+  id: '/explicacoes',
+  path: '/explicacoes',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppExerciciosRoute = AppExerciciosRouteImport.update({
   id: '/exercicios',
   path: '/exercicios',
@@ -100,6 +107,11 @@ const AppExerciciosRoute = AppExerciciosRouteImport.update({
 const AppExamesRoute = AppExamesRouteImport.update({
   id: '/exames',
   path: '/exames',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppConfiguracoesRoute = AppConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
   getParentRoute: () => AppRoute,
 } as any)
 const AppChatRoute = AppChatRouteImport.update({
@@ -124,8 +136,10 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AppAdminRoute
   '/afiliados': typeof AppAfiliadosRoute
   '/chat': typeof AppChatRoute
+  '/configuracoes': typeof AppConfiguracoesRoute
   '/exames': typeof AppExamesRoute
   '/exercicios': typeof AppExerciciosRoute
+  '/explicacoes': typeof AppExplicacoesRoute
   '/formulas': typeof AppFormulasRoute
   '/inicio': typeof AppInicioRoute
   '/matematica': typeof AppMatematicaRoute
@@ -143,8 +157,10 @@ export interface FileRoutesByTo {
   '/admin': typeof AppAdminRoute
   '/afiliados': typeof AppAfiliadosRoute
   '/chat': typeof AppChatRoute
+  '/configuracoes': typeof AppConfiguracoesRoute
   '/exames': typeof AppExamesRoute
   '/exercicios': typeof AppExerciciosRoute
+  '/explicacoes': typeof AppExplicacoesRoute
   '/formulas': typeof AppFormulasRoute
   '/inicio': typeof AppInicioRoute
   '/matematica': typeof AppMatematicaRoute
@@ -164,8 +180,10 @@ export interface FileRoutesById {
   '/_app/admin': typeof AppAdminRoute
   '/_app/afiliados': typeof AppAfiliadosRoute
   '/_app/chat': typeof AppChatRoute
+  '/_app/configuracoes': typeof AppConfiguracoesRoute
   '/_app/exames': typeof AppExamesRoute
   '/_app/exercicios': typeof AppExerciciosRoute
+  '/_app/explicacoes': typeof AppExplicacoesRoute
   '/_app/formulas': typeof AppFormulasRoute
   '/_app/inicio': typeof AppInicioRoute
   '/_app/matematica': typeof AppMatematicaRoute
@@ -185,8 +203,10 @@ export interface FileRouteTypes {
     | '/admin'
     | '/afiliados'
     | '/chat'
+    | '/configuracoes'
     | '/exames'
     | '/exercicios'
+    | '/explicacoes'
     | '/formulas'
     | '/inicio'
     | '/matematica'
@@ -204,8 +224,10 @@ export interface FileRouteTypes {
     | '/admin'
     | '/afiliados'
     | '/chat'
+    | '/configuracoes'
     | '/exames'
     | '/exercicios'
+    | '/explicacoes'
     | '/formulas'
     | '/inicio'
     | '/matematica'
@@ -224,8 +246,10 @@ export interface FileRouteTypes {
     | '/_app/admin'
     | '/_app/afiliados'
     | '/_app/chat'
+    | '/_app/configuracoes'
     | '/_app/exames'
     | '/_app/exercicios'
+    | '/_app/explicacoes'
     | '/_app/formulas'
     | '/_app/inicio'
     | '/_app/matematica'
@@ -338,6 +362,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppFormulasRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/explicacoes': {
+      id: '/_app/explicacoes'
+      path: '/explicacoes'
+      fullPath: '/explicacoes'
+      preLoaderRoute: typeof AppExplicacoesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/exercicios': {
       id: '/_app/exercicios'
       path: '/exercicios'
@@ -350,6 +381,13 @@ declare module '@tanstack/react-router' {
       path: '/exames'
       fullPath: '/exames'
       preLoaderRoute: typeof AppExamesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/configuracoes': {
+      id: '/_app/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof AppConfiguracoesRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/chat': {
@@ -380,8 +418,10 @@ interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRoute
   AppAfiliadosRoute: typeof AppAfiliadosRoute
   AppChatRoute: typeof AppChatRoute
+  AppConfiguracoesRoute: typeof AppConfiguracoesRoute
   AppExamesRoute: typeof AppExamesRoute
   AppExerciciosRoute: typeof AppExerciciosRoute
+  AppExplicacoesRoute: typeof AppExplicacoesRoute
   AppFormulasRoute: typeof AppFormulasRoute
   AppInicioRoute: typeof AppInicioRoute
   AppMatematicaRoute: typeof AppMatematicaRoute
@@ -397,8 +437,10 @@ const AppRouteChildren: AppRouteChildren = {
   AppAdminRoute: AppAdminRoute,
   AppAfiliadosRoute: AppAfiliadosRoute,
   AppChatRoute: AppChatRoute,
+  AppConfiguracoesRoute: AppConfiguracoesRoute,
   AppExamesRoute: AppExamesRoute,
   AppExerciciosRoute: AppExerciciosRoute,
+  AppExplicacoesRoute: AppExplicacoesRoute,
   AppFormulasRoute: AppFormulasRoute,
   AppInicioRoute: AppInicioRoute,
   AppMatematicaRoute: AppMatematicaRoute,
