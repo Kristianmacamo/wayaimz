@@ -19,6 +19,7 @@ import { Route as AppSuporteRouteImport } from './routes/_app.suporte'
 import { Route as AppPlanosRouteImport } from './routes/_app.planos'
 import { Route as AppPerfilRouteImport } from './routes/_app.perfil'
 import { Route as AppPagamentosRouteImport } from './routes/_app.pagamentos'
+import { Route as AppMatematicaRouteImport } from './routes/_app.matematica'
 import { Route as AppInicioRouteImport } from './routes/_app.inicio'
 import { Route as AppFormulasRouteImport } from './routes/_app.formulas'
 import { Route as AppExerciciosRouteImport } from './routes/_app.exercicios'
@@ -76,6 +77,11 @@ const AppPagamentosRoute = AppPagamentosRouteImport.update({
   path: '/pagamentos',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMatematicaRoute = AppMatematicaRouteImport.update({
+  id: '/matematica',
+  path: '/matematica',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppInicioRoute = AppInicioRouteImport.update({
   id: '/inicio',
   path: '/inicio',
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/exercicios': typeof AppExerciciosRoute
   '/formulas': typeof AppFormulasRoute
   '/inicio': typeof AppInicioRoute
+  '/matematica': typeof AppMatematicaRoute
   '/pagamentos': typeof AppPagamentosRoute
   '/perfil': typeof AppPerfilRoute
   '/planos': typeof AppPlanosRoute
@@ -140,6 +147,7 @@ export interface FileRoutesByTo {
   '/exercicios': typeof AppExerciciosRoute
   '/formulas': typeof AppFormulasRoute
   '/inicio': typeof AppInicioRoute
+  '/matematica': typeof AppMatematicaRoute
   '/pagamentos': typeof AppPagamentosRoute
   '/perfil': typeof AppPerfilRoute
   '/planos': typeof AppPlanosRoute
@@ -160,6 +168,7 @@ export interface FileRoutesById {
   '/_app/exercicios': typeof AppExerciciosRoute
   '/_app/formulas': typeof AppFormulasRoute
   '/_app/inicio': typeof AppInicioRoute
+  '/_app/matematica': typeof AppMatematicaRoute
   '/_app/pagamentos': typeof AppPagamentosRoute
   '/_app/perfil': typeof AppPerfilRoute
   '/_app/planos': typeof AppPlanosRoute
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/exercicios'
     | '/formulas'
     | '/inicio'
+    | '/matematica'
     | '/pagamentos'
     | '/perfil'
     | '/planos'
@@ -198,6 +208,7 @@ export interface FileRouteTypes {
     | '/exercicios'
     | '/formulas'
     | '/inicio'
+    | '/matematica'
     | '/pagamentos'
     | '/perfil'
     | '/planos'
@@ -217,6 +228,7 @@ export interface FileRouteTypes {
     | '/_app/exercicios'
     | '/_app/formulas'
     | '/_app/inicio'
+    | '/_app/matematica'
     | '/_app/pagamentos'
     | '/_app/perfil'
     | '/_app/planos'
@@ -305,6 +317,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPagamentosRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/matematica': {
+      id: '/_app/matematica'
+      path: '/matematica'
+      fullPath: '/matematica'
+      preLoaderRoute: typeof AppMatematicaRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/inicio': {
       id: '/_app/inicio'
       path: '/inicio'
@@ -365,6 +384,7 @@ interface AppRouteChildren {
   AppExerciciosRoute: typeof AppExerciciosRoute
   AppFormulasRoute: typeof AppFormulasRoute
   AppInicioRoute: typeof AppInicioRoute
+  AppMatematicaRoute: typeof AppMatematicaRoute
   AppPagamentosRoute: typeof AppPagamentosRoute
   AppPerfilRoute: typeof AppPerfilRoute
   AppPlanosRoute: typeof AppPlanosRoute
@@ -381,6 +401,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppExerciciosRoute: AppExerciciosRoute,
   AppFormulasRoute: AppFormulasRoute,
   AppInicioRoute: AppInicioRoute,
+  AppMatematicaRoute: AppMatematicaRoute,
   AppPagamentosRoute: AppPagamentosRoute,
   AppPerfilRoute: AppPerfilRoute,
   AppPlanosRoute: AppPlanosRoute,
