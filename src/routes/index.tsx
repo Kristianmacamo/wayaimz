@@ -3,6 +3,7 @@ import { GraduationCap, ArrowRight, Sparkles, BookOpen, FileText, Beaker, Clipbo
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { PLANS } from "@/lib/plans";
+import { CategoryGrid } from "@/components/CategoryGrid";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -62,6 +63,19 @@ function LandingPage() {
             </div>
             <p className="mt-3 text-xs text-muted-foreground">2 conversas grátis para experimentar — sem cartão.</p>
           </div>
+
+          {/* welcome */}
+          <div className="mx-auto mt-14 max-w-3xl rounded-2xl border bg-card p-6 shadow-soft">
+            <h2 className="font-display text-2xl font-bold">Bem-vindo ao Way Estudantes AI</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              O Way Estudantes AI é uma plataforma criada para ajudar estudantes de Moçambique a aprender de forma mais
+              simples, organizada e moderna. Aqui o estudante encontra explicações passo a passo, fórmulas matemáticas,
+              ajuda para trabalhos académicos e ferramentas inteligentes para melhorar o desempenho escolar e universitário.
+            </p>
+          </div>
+
+          <h2 className="mb-4 mt-12 text-center font-display text-2xl font-bold">Categorias</h2>
+          <CategoryGrid authed={false} />
 
           {/* features grid */}
           <div className="mt-16 grid grid-cols-2 gap-3 md:grid-cols-4">

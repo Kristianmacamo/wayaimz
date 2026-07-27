@@ -1,7 +1,9 @@
 import { createFileRoute, Outlet, redirect, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { GraduationCap, MessageSquare, BookOpen, Beaker, ClipboardCheck, FileText, CreditCard, Users, User as UserIcon, LifeBuoy, LogOut, Menu, X, Shield, Wallet } from "lucide-react";
+import { GraduationCap, MessageSquare, BookOpen, Beaker, ClipboardCheck, FileText, CreditCard, Users, User as UserIcon, LifeBuoy, LogOut, Menu, X, Shield, Wallet, Home, Calculator, Sigma, Lightbulb, Settings } from "lucide-react";
+import { AppTabBar } from "@/components/AppTabBar";
+import { QuickActionsFab } from "@/components/QuickActionsFab";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 
@@ -16,15 +18,23 @@ export const Route = createFileRoute("/_app")({
 });
 
 const NAV = [
+  { to: "/inicio", label: "Início", icon: Home },
   { to: "/chat", label: "Chat AI", icon: MessageSquare },
-  { to: "/trabalhos", label: "Trabalhos", icon: BookOpen },
-  { to: "/exercicios", label: "Exercícios", icon: Beaker },
+  { to: "/matematica", label: "Matemática", icon: Sigma },
+  { to: "/formulas", label: "Fórmulas", icon: Calculator },
+  { to: "/trabalhos", label: "Trabalhos Académicos", icon: BookOpen },
+  { to: "/explicacoes", label: "Explicações", icon: Lightbulb },
+  { to: "/exercicios", label: "Exercícios Práticos", icon: Beaker },
+  { to: "/planos", label: "Planos", icon: CreditCard },
+  { to: "/perfil", label: "Perfil do Estudante", icon: UserIcon },
+  { to: "/configuracoes", label: "Configurações", icon: Settings },
+] as const;
+
+const NAV_SECONDARY = [
   { to: "/testes", label: "Testes", icon: ClipboardCheck },
   { to: "/exames", label: "Exames", icon: FileText },
-  { to: "/planos", label: "Planos", icon: CreditCard },
   { to: "/pagamentos", label: "Pagamentos", icon: Wallet },
   { to: "/afiliados", label: "Afiliados", icon: Users },
-  { to: "/perfil", label: "Perfil", icon: UserIcon },
   { to: "/suporte", label: "Suporte", icon: LifeBuoy },
 ] as const;
 
@@ -62,7 +72,7 @@ function AppLayout() {
       {/* Sidebar */}
       <aside className={`fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r bg-sidebar transition-transform md:static md:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex h-16 items-center justify-between border-b px-4">
-          <Link to="/chat" className="flex items-center gap-2">
+          <Link to="/inicio" className="flex items-center gap-2">
             <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-hero text-primary-foreground">
               <GraduationCap className="h-5 w-5" />
             </div>
@@ -94,6 +104,15 @@ function AppLayout() {
               </Link>
             );
           })}
+          <p className="mb-1 mt-4 px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Mais</p>
+          {NAV_SECONDARY.map((item) => {
+            const active = pathname.startsWith(item.to);
+            return (
+              <Link key={item.to} to={item.to} className={`mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${active ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold" : "hover:bg-sidebar-accent/60"}`}>
+                <item.icon className="h-4 w-4" />{item.label}
+              </Link>
+            );
+          })}
           {isAdmin && (
             <Link to="/admin" className={`mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${pathname.startsWith("/admin") ? "bg-secondary-soft text-secondary font-semibold" : "hover:bg-sidebar-accent/60"}`}>
               <Shield className="h-4 w-4" /> Administração
@@ -114,9 +133,11 @@ function AppLayout() {
           <button onClick={() => setOpen(true)}><Menu className="h-5 w-5" /></button>
           <span className="font-display font-bold">Way Estudantes <span className="text-gradient">AI</span></span>
         </header>
-        <main className="flex-1"><Outlet /></main>
+        <main className="flex-1 pb-16 md:pb-0"><Outlet /></main>
       </div>
 
+      <AppTabBar />
+      <QuickActionsFab />
       {open && <div className="fixed inset-0 z-30 bg-black/40 md:hidden" onClick={() => setOpen(false)} />}
     </div>
   );
