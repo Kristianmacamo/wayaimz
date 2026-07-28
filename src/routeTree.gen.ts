@@ -29,6 +29,7 @@ import { Route as AppConfiguracoesRouteImport } from './routes/_app.configuracoe
 import { Route as AppChatRouteImport } from './routes/_app.chat'
 import { Route as AppAfiliadosRouteImport } from './routes/_app.afiliados'
 import { Route as AppAdminRouteImport } from './routes/_app.admin'
+import { Route as AppFormulasIdRouteImport } from './routes/_app.formulas.$id'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -129,6 +130,11 @@ const AppAdminRoute = AppAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
+const AppFormulasIdRoute = AppFormulasIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppFormulasRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -140,7 +146,7 @@ export interface FileRoutesByFullPath {
   '/exames': typeof AppExamesRoute
   '/exercicios': typeof AppExerciciosRoute
   '/explicacoes': typeof AppExplicacoesRoute
-  '/formulas': typeof AppFormulasRoute
+  '/formulas': typeof AppFormulasRouteWithChildren
   '/inicio': typeof AppInicioRoute
   '/matematica': typeof AppMatematicaRoute
   '/pagamentos': typeof AppPagamentosRoute
@@ -150,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/testes': typeof AppTestesRoute
   '/trabalhos': typeof AppTrabalhosRoute
   '/api/chat': typeof ApiChatRoute
+  '/formulas/$id': typeof AppFormulasIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -161,7 +168,7 @@ export interface FileRoutesByTo {
   '/exames': typeof AppExamesRoute
   '/exercicios': typeof AppExerciciosRoute
   '/explicacoes': typeof AppExplicacoesRoute
-  '/formulas': typeof AppFormulasRoute
+  '/formulas': typeof AppFormulasRouteWithChildren
   '/inicio': typeof AppInicioRoute
   '/matematica': typeof AppMatematicaRoute
   '/pagamentos': typeof AppPagamentosRoute
@@ -171,6 +178,7 @@ export interface FileRoutesByTo {
   '/testes': typeof AppTestesRoute
   '/trabalhos': typeof AppTrabalhosRoute
   '/api/chat': typeof ApiChatRoute
+  '/formulas/$id': typeof AppFormulasIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -184,7 +192,7 @@ export interface FileRoutesById {
   '/_app/exames': typeof AppExamesRoute
   '/_app/exercicios': typeof AppExerciciosRoute
   '/_app/explicacoes': typeof AppExplicacoesRoute
-  '/_app/formulas': typeof AppFormulasRoute
+  '/_app/formulas': typeof AppFormulasRouteWithChildren
   '/_app/inicio': typeof AppInicioRoute
   '/_app/matematica': typeof AppMatematicaRoute
   '/_app/pagamentos': typeof AppPagamentosRoute
@@ -194,6 +202,7 @@ export interface FileRoutesById {
   '/_app/testes': typeof AppTestesRoute
   '/_app/trabalhos': typeof AppTrabalhosRoute
   '/api/chat': typeof ApiChatRoute
+  '/_app/formulas/$id': typeof AppFormulasIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -217,6 +226,7 @@ export interface FileRouteTypes {
     | '/testes'
     | '/trabalhos'
     | '/api/chat'
+    | '/formulas/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -238,6 +248,7 @@ export interface FileRouteTypes {
     | '/testes'
     | '/trabalhos'
     | '/api/chat'
+    | '/formulas/$id'
   id:
     | '__root__'
     | '/'
@@ -260,6 +271,7 @@ export interface FileRouteTypes {
     | '/_app/testes'
     | '/_app/trabalhos'
     | '/api/chat'
+    | '/_app/formulas/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -411,8 +423,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/formulas/$id': {
+      id: '/_app/formulas/$id'
+      path: '/$id'
+      fullPath: '/formulas/$id'
+      preLoaderRoute: typeof AppFormulasIdRouteImport
+      parentRoute: typeof AppFormulasRoute
+    }
   }
 }
+
+interface AppFormulasRouteChildren {
+  AppFormulasIdRoute: typeof AppFormulasIdRoute
+}
+
+const AppFormulasRouteChildren: AppFormulasRouteChildren = {
+  AppFormulasIdRoute: AppFormulasIdRoute,
+}
+
+const AppFormulasRouteWithChildren = AppFormulasRoute._addFileChildren(
+  AppFormulasRouteChildren,
+)
 
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRoute
@@ -422,7 +453,7 @@ interface AppRouteChildren {
   AppExamesRoute: typeof AppExamesRoute
   AppExerciciosRoute: typeof AppExerciciosRoute
   AppExplicacoesRoute: typeof AppExplicacoesRoute
-  AppFormulasRoute: typeof AppFormulasRoute
+  AppFormulasRoute: typeof AppFormulasRouteWithChildren
   AppInicioRoute: typeof AppInicioRoute
   AppMatematicaRoute: typeof AppMatematicaRoute
   AppPagamentosRoute: typeof AppPagamentosRoute
@@ -441,7 +472,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppExamesRoute: AppExamesRoute,
   AppExerciciosRoute: AppExerciciosRoute,
   AppExplicacoesRoute: AppExplicacoesRoute,
-  AppFormulasRoute: AppFormulasRoute,
+  AppFormulasRoute: AppFormulasRouteWithChildren,
   AppInicioRoute: AppInicioRoute,
   AppMatematicaRoute: AppMatematicaRoute,
   AppPagamentosRoute: AppPagamentosRoute,

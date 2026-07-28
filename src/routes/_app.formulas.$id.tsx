@@ -52,7 +52,11 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 function FormulaPage() {
-  const { category, formula } = Route.useLoaderData();
+  const { category, formula } = Route.useLoaderData() as ReturnType<typeof import("@/lib/formulas").findFormula> & {
+    category: import("@/lib/formulas").FormulaCategory;
+    formula: import("@/lib/formulas").Formula;
+  };
+
   const explain = useServerFn(explainFormula);
   const [extra, setExtra] = useState("");
   const [loading, setLoading] = useState(false);
