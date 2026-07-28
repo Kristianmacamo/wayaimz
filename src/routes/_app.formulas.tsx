@@ -78,9 +78,9 @@ function FormulasPage() {
               <pre className="mt-1 whitespace-pre-wrap font-sans text-sm">{f.example}</pre>
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Button asChild size="sm" variant="outline">
-                <Link to="/chat" search={{ start: `Explique passo a passo a fórmula "${f.name}" (${f.formula}) com um exemplo resolvido.` } as never}>
-                  <Sparkles className="mr-1 h-4 w-4" /> Pedir explicação
+              <Button asChild size="sm" className="bg-gradient-hero">
+                <Link to="/formulas/$id" params={{ id: f.id }}>
+                  <Sparkles className="mr-1 h-4 w-4" /> Ver explicação completa
                 </Link>
               </Button>
               <Button asChild size="sm" variant="ghost">
@@ -89,6 +89,7 @@ function FormulasPage() {
                 </Link>
               </Button>
             </div>
+
           </ContentCard>
         ))}
       </div>
