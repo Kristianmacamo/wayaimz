@@ -1,63 +1,73 @@
 ## Objetivo
 
-Atualizar o Way Estudantes AI com uma estrutura de navegação moderna (side menu, tab bar, FAB, bottom sheet, cartões em grid), uma biblioteca de Fórmulas com explicação e exemplo, e uma área de Trabalhos Académicos com escolha de 6, 12 ou 18 páginas.
+Reconstruir o Way Estudantes AI com áreas totalmente separadas (Chat, TPC, Trabalhos, Testes, Exames, Fórmulas), fórmulas apresentadas em formato matemático real e uma interface moderna com histórico e exportação.
 
-## 1. Página inicial
+## 1. Corrigir a renderização das fórmulas
 
-- Novo bloco de boas-vindas: "Bem-vindo ao Way Estudantes AI" com o texto de apresentação (explicações passo a passo, fórmulas, trabalhos académicos, ferramentas inteligentes).
-- Grid de categorias em cartões retangulares: Geometria, Álgebra, Estatística, Contabilidade, Gestão, Economia, Programação, Trabalhos Académicos — cada cartão leva ao chat/fórmulas com contexto da matéria.
-- Botões existentes (Criar Conta / Entrar / Experimentar) mantidos.
+Hoje o chat usa Markdown simples, por isso o LaTeX (`$`, `\Delta`, `\frac`, `\sqrt`, `\cdot`) aparece como texto cru.
 
-## 2. Navegação
+- Adicionar renderização matemática real (KaTeX) a todas as respostas da IA e às páginas de fórmulas: `Δ = b² − 4ac` e frações/raízes aparecem desenhadas, nunca como código.
+- Rede de segurança: um conversor que transforma qualquer LaTeX restante em texto legível (`\frac{a}{b}` → `(a) / (b)`, `\sqrt{x}` → `√x`, `\cdot` → `×`, remove `$`).
+- Reforçar as instruções da IA para escrever matemática limpa.
+- Cada fórmula/bloco de resolução dentro da sua própria caixa, separada por espaço — sem linhas horizontais.
 
-**Menu lateral (desktop e gaveta no telemóvel)**
-Início · Matemática · Fórmulas · Trabalhos Académicos · Explicações · Exercícios Práticos · Planos · Perfil do Estudante · Configurações
-(mantém-se acesso a Pagamentos, Afiliados, Suporte e Admin numa secção secundária do menu)
+## 2. Chat com IA (página independente)
 
-**Tab bar inferior (só telemóvel)**
-Início · Fórmulas · Praticar · Trabalhos · Conta
+`/chat` passa a ser só conversa, sem misturar Trabalhos/TPC/Fórmulas.
 
-**FAB (botão flutuante, canto inferior direito)**
-Abre um bottom sheet com ações rápidas: Carregar Foto · Resolver Exercício · Criar Resumo · Gerar Introdução · Ver Fórmulas. Cada ação abre o chat com o pedido pré-preenchido (ou o seletor de imagem, conforme o plano).
+- Escrever pergunta, carregar fotografia, PDF e Word.
+- Fotografia: a IA lê a imagem, reconhece o texto, resolve e explica passo a passo (modelo multimodal).
+- PDF/Word: texto extraído e enviado como contexto.
+- Histórico de conversas (lista lateral, várias conversas), copiar resposta, regenerar resposta.
+- Respostas longas e organizadas com títulos, parágrafos e caixas.
 
-**Menu de três pontos nos cartões**
-Guardar · Partilhar · Editar · Apagar · Ver detalhes (guardar usa a base de dados do utilizador; partilhar usa link/WhatsApp).
+## 3. TPC (`/tpc`)
 
-## 3. Fórmulas
+Página própria: pergunta escrita, fotografia, PDF ou Word; resposta passo a passo, com resultado guardado no histórico. Não abre o chat.
 
-Nova página `/formulas` com fórmulas por categoria, cada uma em cartão com: fórmula, explicação dos símbolos e exemplo prático resolvido. Conteúdo inicial de Geometria:
-- Área do triângulo: A = (b × h) ÷ 2 — exemplo 10 e 6 → 30
-- Área do trapézio: A = [(B + b) × h] ÷ 2 — exemplo 12, 8, 5 → 50
-- Área do paralelogramo: A = b × h — exemplo 9 × 4 → 36
-- Área do círculo: A = π × r² — exemplo r = 7 → π × 49
+## 4. Trabalhos Académicos (`/trabalhos`)
 
-Cada fórmula tem botão "Pedir explicação à IA" e "Ver exercícios".
+Sem qualquer ligação ao chat.
 
-## 4. Trabalhos Académicos
+- Formulário: Tema, Curso, Descrição (e tamanho 6/12/18 páginas já existente).
+- "Gerar Trabalho" abre uma **página de documento** (`/trabalhos/$id`) que gera: Capa, Índice, Introdução, Objetivos, Desenvolvimento (Capítulos 1–3), Conclusão, Referências (APA 7), Apêndices, Anexos.
+- No documento: visualizar, editar secções, guardar, exportar PDF e exportar Word (.docx).
 
-Página `/trabalhos` reformulada: escolher tema + tamanho do trabalho.
-- 6 páginas: capa, índice, introdução, desenvolvimento, conclusão, referências. Para TPCs e relatórios curtos.
-- 12 páginas: acrescenta objetivos, revisão teórica, exemplos práticos, apêndices. Para módulos e seminários.
-- 18 páginas: acrescenta problema de pesquisa, objetivos geral/específicos, metodologia, fundamentação teórica, análise e discussão. Para projetos finais e estágios.
+## 5. Testes (`/testes`) e Exames (`/exames`)
 
-Inclui blocos explicativos com modelo de introdução, modelo de conclusão, formato de referências bibliográficas e o que colocar em apêndices. Ao gerar, a IA recebe a estrutura escolhida como instrução; download de PDF permanece exclusivo do plano Premium.
+- Testes: geração automática de perguntas, respostas do aluno, correção, pontuação e explicação.
+- Exames: exame completo com perguntas, resolução, nota final e explicação.
+- Ambos guardados no histórico.
 
-## 5. Planos
+## 6. Fórmulas (`/formulas` e `/formulas/$id`)
 
-Atualizar os textos dos planos com as vantagens indicadas, mantendo os preços atuais (65 MT e 299 MT) e o fluxo M-Pesa manual:
-- Semanal/Básico: até 3 fotos por semana, exercícios básicos, acesso às fórmulas, explicações simples.
-- Premium: até 10 fotos, resolução avançada, criação automática de trabalhos, resumos inteligentes, prioridade nas respostas.
+Cada fórmula abre uma página completa com: Introdução, Conceito, Quando utilizar, Fórmula (caixa destacada), Explicação das variáveis, Exemplo resolvido, Exercício, Resposta, Dicas, Resumo.
 
-Cada plano ganha uma ilustração gerada (estudante com telemóvel; estudante com laptop).
+Conteúdo baseado nas 20 fórmulas mais importantes da matemática (Pitágoras, Bhaskara, áreas, juros simples e compostos, relação fundamental da trigonometria, identidade de Euler, Euler para poliedros, etc.), além das categorias já existentes.
 
-## 6. Configurações e Perfil
+## 7. Interface
 
-Nova página `/configuracoes`: dados da conta, foto/emoji, notificações, tema, sair. Perfil do Estudante mostra créditos, plano, progresso.
+Grid layout, menu lateral, tab bar no telemóvel, botão flutuante com bottom sheet, menu de três pontos nos cartões, cartões retangulares, pesquisa inteligente (procura em fórmulas, páginas e histórico), modo claro/escuro e animações suaves.
+
+## 8. Histórico e Perfil
+
+- Histórico único (`/historico`) com perguntas, TPC, trabalhos, testes, exames, fórmulas, documentos, fotografias e PDFs.
+- Perfil: fotografia, nome, plano, histórico, favoritos e configurações.
+
+## 9. Rodapé
+
+Contacto, WhatsApp 844772002, e-mail tendigitalmz@gmail.com, Política de Privacidade, Termos de Utilização, Perguntas Frequentes e Sobre o Way Estudantes AI (páginas próprias).
+
+## 10. Regras de plano
+
+- Fotografias e ficheiros (PDF/Word): apenas planos pagos (65 MT e 299 MT). No plano gratuito aparece um aviso a convidar à subscrição.
+- Exportar PDF e Word: disponível no Básico (65 MT) e no Premium (299 MT).
 
 ## Notas técnicas
 
-- Novas rotas: `_app.formulas.tsx`, `_app.matematica.tsx`, `_app.explicacoes.tsx`, `_app.configuracoes.tsx`; `_app.trabalhos.tsx` reescrita.
-- Componentes novos: `AppTabBar`, `QuickActionsFab` (Sheet do shadcn), `CategoryGrid`, `ContentCard` (com DropdownMenu de 3 pontos), `FormulaCard`.
-- Dados de fórmulas e estruturas de trabalho em `src/lib/formulas.ts` e `src/lib/trabalhos.ts` (estáticos, sem base de dados).
-- Guardar cartões exige uma tabela nova `saved_items` com RLS por utilizador e GRANTs.
-- Layout `_app.tsx` passa a incluir tab bar + FAB com padding inferior no telemóvel; tudo usa os tokens semânticos existentes (azul/verde académico).
+- Base de dados: nova tabela `documents` (trabalhos gerados, secções, estado), `history_items` (registo transversal) e reutilização de `saved_items` para favoritos; bucket `uploads` privado para imagens/PDF/Word do utilizador. Tudo com RLS por utilizador e GRANTs.
+- Rotas novas: `_app.tpc.tsx`, `_app.historico.tsx`, `_app.formulas.$id.tsx`, `_app.trabalhos.index.tsx`, `_app.trabalhos.$id.tsx`, `privacidade`, `termos`, `faq`, `sobre`.
+- Servidor: `createServerFn` separados para gerar trabalho, testes, exames e respostas de TPC (não passam pelo endpoint de chat); `/api/chat` fica exclusivo da conversa e passa a aceitar imagens.
+- Renderização: `remark-math` + `rehype-katex` com CSS do KaTeX carregado no `__root.tsx`, mais utilitário `sanitizeMath` para o fallback.
+- Exportação: PDF via geração no cliente e Word via ficheiro `.docx` gerado no servidor.
+- Créditos: cada geração (trabalho, teste, exame, TPC) desconta créditos como o chat.
