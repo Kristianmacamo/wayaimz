@@ -73,6 +73,81 @@ export type Database = {
         }
         Relationships: []
       }
+      documents: {
+        Row: {
+          created_at: string
+          curso: string
+          descricao: string
+          id: string
+          pages: number
+          sections: Json
+          status: string
+          tema: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          curso?: string
+          descricao?: string
+          id?: string
+          pages?: number
+          sections?: Json
+          status?: string
+          tema: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          curso?: string
+          descricao?: string
+          id?: string
+          pages?: number
+          sections?: Json
+          status?: string
+          tema?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      history_items: {
+        Row: {
+          content: string | null
+          created_at: string
+          file_url: string | null
+          href: string | null
+          id: string
+          kind: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          file_url?: string | null
+          href?: string | null
+          id?: string
+          kind: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          file_url?: string | null
+          href?: string | null
+          id?: string
+          kind?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
