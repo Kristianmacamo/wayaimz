@@ -4,6 +4,14 @@ export type Formula = {
   formula: string;
   explanation: string[];
   example: string;
+  /** Secções da página completa (opcionais — há valores por omissão) */
+  intro?: string;
+  concept?: string;
+  whenToUse?: string;
+  exercise?: string;
+  answer?: string;
+  tips?: string[];
+  summary?: string;
 };
 
 export type FormulaCategory = {
@@ -12,6 +20,7 @@ export type FormulaCategory = {
   emoji: string;
   formulas: Formula[];
 };
+
 
 export const FORMULA_CATEGORIES: FormulaCategory[] = [
   {
