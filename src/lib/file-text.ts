@@ -34,11 +34,14 @@ async function pdfToText(file: File) {
 }
 
 async function wordToText(file: File) {
-  const mammoth = await import("mammoth/mammoth.browser");
+  const mammoth = (await import("mammoth/mammoth.browser")) as unknown as {
+    extractRawText: (opts: { arrayBuffer: ArrayBuffer }) => Promise<{ value: string }>;
+  };
   const buffer = await file.arrayBuffer();
   const result = await mammoth.extractRawText({ arrayBuffer: buffer });
   return result.value;
 }
+
 
 export async function extractFile(file: File): Promise<ExtractedFile> {
   const type = file.type || "";
