@@ -18,7 +18,31 @@ export const Route = createFileRoute("/_app/chat")({
 function ChatPage() {
   const { start } = Route.useSearch();
   const [input, setInput] = useState(start ?? "");
+  const [images, setImages] = useState<{ url: string; name: string; mediaType: string }[]>([]);
   const endRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+
+  async function addFiles(list: FileList | null) {
+    if (!list?.length) return;
+    for (const file of Array.from(list).slice(0, 3)) {
+      if (!file.type.startsWith("image/")) {
+        toast.error("Envie apenas imagens.");
+        continue;
+      }
+      if (file.size > 6 * 1024 * 1024) {
+        toast.error("Imagem demasiado grande (máx. 6 MB).");
+        continue;
+      }
+      const url = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(new Error("Falha ao ler a imagem"));
+        reader.readAsDataURL(file);
+      });
+      setImages((prev) => [...prev, { url, name: file.name, mediaType: file.type }]);
+    }
+  }
 
   const { data: history } = useQuery({
     queryKey: ["history"],
@@ -61,11 +85,13 @@ function ChatPage() {
   const loading = status === "submitted" || status === "streaming";
 
   async function onSend() {
-    if (!input.trim() || loading) return;
+    if ((!input.trim() && images.length === 0) || loading) return;
     const text = input.trim();
+    const files = images.map((i) => ({ type: "file" as const, url: i.url, mediaType: i.mediaType, filename: i.name }));
     setInput("");
+    setImages([]);
     try {
-      await sendMessage({ text });
+      await sendMessage({ text: text || "Analisa esta imagem e responde.", files });
     } catch (e) {
       console.error(e);
     }
@@ -163,7 +189,31 @@ function ChatPage() {
       </div>
 
       <div className="border-t bg-card p-3">
+        {images.length > 0 && (
+          <div className="mx-auto mb-2 flex max-w-3xl flex-wrap gap-2">
+            {images.map((img, i) => (
+              <div key={i} className="relative">
+                <img src={img.url} alt={img.name} className="h-16 w-16 rounded-lg border object-cover" />
+                <button
+                  onClick={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}
+                  className="absolute -right-1.5 -top-1.5 grid h-5 w-5 place-items-center rounded-full bg-destructive text-destructive-foreground"
+                  aria-label="Remover imagem"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        <input ref={fileRef} type="file" accept="image/*" multiple hidden onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
+        <input ref={cameraRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
         <div className="mx-auto flex max-w-3xl items-end gap-2">
+          <Button variant="outline" size="icon" className="h-11 w-11 shrink-0" onClick={() => fileRef.current?.click()} disabled={loading} aria-label="Carregar foto">
+            <ImagePlus className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="icon" className="h-11 w-11 shrink-0 md:hidden" onClick={() => cameraRef.current?.click()} disabled={loading} aria-label="Tirar foto">
+            <Camera className="h-4 w-4" />
+          </Button>
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -173,7 +223,7 @@ function ChatPage() {
             className="min-h-[44px] resize-none"
             disabled={loading}
           />
-          <Button onClick={onSend} disabled={!input.trim() || loading} className="bg-gradient-hero h-11 w-11 p-0">
+          <Button onClick={onSend} disabled={(!input.trim() && images.length === 0) || loading} className="bg-gradient-hero h-11 w-11 p-0">
             <Send className="h-4 w-4" />
           </Button>
         </div>
