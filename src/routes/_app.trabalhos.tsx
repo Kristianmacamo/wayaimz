@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { generateWork } from "@/lib/ai.functions";
@@ -51,10 +51,13 @@ function TrabalhosPage() {
     },
   });
 
+  const [elapsed, setElapsed] = useState(0);
+
   const gerar = useServerFn(generateWork);
   const mutation = useMutation({
     mutationFn: async () =>
       gerar({ data: { tema: tema.trim(), curso: curso.trim(), descricao: descricao.trim(), pages: MINUTES_TO_PAGES[minutos] } }),
+    onMutate: () => setElapsed(0),
     onSuccess: (res) => {
       setOpen(false);
       qc.invalidateQueries({ queryKey: ["documents"] });
@@ -63,6 +66,12 @@ function TrabalhosPage() {
     },
     onError: (e: Error) => toast.error(e.message || "Não foi possível gerar o trabalho."),
   });
+
+  useEffect(() => {
+    if (!mutation.isPending) return;
+    const timer = setInterval(() => setElapsed((v) => v + 1), 1000);
+    return () => clearInterval(timer);
+  }, [mutation.isPending]);
 
   return (
     <div className="mx-auto max-w-4xl p-5 pb-28 md:p-10">
@@ -136,8 +145,17 @@ function TrabalhosPage() {
               disabled={!tema.trim() || mutation.isPending}
               onClick={() => mutation.mutate()}
             >
-              {mutation.isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> A gerar documento...</> : "Gerar documento"}
+              {mutation.isPending ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> A gerar documento... {Math.floor(elapsed / 60)}:{String(elapsed % 60).padStart(2, "0")}</>
+              ) : (
+                "Gerar documento"
+              )}
             </Button>
+            {mutation.isPending && (
+              <p className="text-center text-xs text-muted-foreground">
+                A escrever capa, índice e capítulos. Pode demorar 1 a 3 minutos — não feche esta janela.
+              </p>
+            )}
             <p className="text-center text-xs text-muted-foreground">
               O conteúdo é gerado apenas no documento — não é enviado para o Chat AI.
             </p>

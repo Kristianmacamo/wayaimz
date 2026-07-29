@@ -18,7 +18,14 @@ function PerfilPage() {
   const qc = useQueryClient();
   const { data: profile } = useQuery({
     queryKey: ["my-profile"],
-    queryFn: async () => (await supabase.from("profiles").select("*").maybeSingle()).data,
+    queryFn: async () => {
+      const { data: auth } = await supabase.auth.getUser();
+      const uid = auth.user?.id;
+      if (!uid) return null;
+      const { data, error } = await supabase.from("profiles").select("*").eq("id", uid).maybeSingle();
+      if (error) throw error;
+      return data;
+    },
   });
 
   const [form, setForm] = useState({ nome: "", apelido: "", telefone: "", emoji: "🎓", nivel: "secundario" as "secundario" | "superior" });
