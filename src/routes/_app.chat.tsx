@@ -4,10 +4,10 @@ import { DefaultChatTransport } from "ai";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Sparkles, Loader2, Search, X, ImagePlus, Camera } from "lucide-react";
+import { Send, Sparkles, Loader2, Search, X, ImagePlus, Camera, Plus, Trash2 } from "lucide-react";
 import { RichText } from "@/components/RichText";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/chat")({
@@ -43,6 +43,8 @@ function ChatPage() {
       setImages((prev) => [...prev, { url, name: file.name, mediaType: file.type }]);
     }
   }
+
+  const qc = useQueryClient();
 
   const { data: history } = useQuery({
     queryKey: ["history"],
@@ -80,6 +82,10 @@ function ChatPage() {
     }
   }, [history, messages.length, setMessages]);
 
+  useEffect(() => {
+    if (start) setInput(start);
+  }, [start]);
+
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, status]);
 
   const loading = status === "submitted" || status === "streaming";
@@ -97,6 +103,25 @@ function ChatPage() {
     }
   }
 
+  function newChat() {
+    setMessages([]);
+    setImages([]);
+    setInput("");
+    toast.success("Novo chat iniciado.");
+  }
+
+  async function clearHistory() {
+    const { data: auth } = await supabase.auth.getUser();
+    const uid = auth.user?.id;
+    if (!uid) return;
+    const { error } = await supabase.from("messages").delete().eq("user_id", uid);
+    if (error) return toast.error("Não foi possível apagar o histórico.");
+    await supabase.from("conversations").delete().eq("user_id", uid);
+    setMessages([]);
+    qc.invalidateQueries({ queryKey: ["history"] });
+    toast.success("Histórico apagado.");
+  }
+
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -107,6 +132,12 @@ function ChatPage() {
         <h1 className="font-display font-semibold flex-1">Chat AI Académico</h1>
         <Button variant="ghost" size="sm" onClick={() => setSearchOpen((v) => !v)} aria-label="Buscar no histórico">
           {searchOpen ? <X className="h-4 w-4" /> : <Search className="h-4 w-4" />}
+        </Button>
+        <Button variant="ghost" size="sm" onClick={newChat} aria-label="Novo chat">
+          <Plus className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="sm" onClick={clearHistory} aria-label="Apagar histórico">
+          <Trash2 className="h-4 w-4 text-destructive" />
         </Button>
       </div>
 
