@@ -1,123 +1,175 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { WORK_SIZES, MODELO_INTRODUCAO, MODELO_CONCLUSAO, MODELO_REFERENCIAS, MODELO_APENDICES, buildWorkPrompt } from "@/lib/trabalhos";
-import { ContentCard } from "@/components/ContentCard";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { generateWork } from "@/lib/ai.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { BookOpen, Check, FileDown, Sparkles } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { BookOpen, FileText, Loader2, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/trabalhos")({
   head: () => ({
     meta: [
       { title: "Trabalhos Académicos — Way Estudantes AI" },
-      { name: "description", content: "Gere trabalhos académicos de 6, 12 ou 18 páginas com capa, índice, introdução, desenvolvimento, conclusão e referências." },
+      { name: "description", content: "Gere trabalhos académicos completos com capa, índice, introdução, desenvolvimento, conclusão e referências, e exporte em Word ou PDF." },
       { property: "og:title", content: "Trabalhos Académicos — Way Estudantes AI" },
-      { property: "og:description", content: "Escolha o tamanho do trabalho e a IA gera a estrutura completa." },
+      { property: "og:description", content: "Indique tema, curso e descrição e receba o documento pronto para descarregar." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: TrabalhosPage,
 });
 
+/** Tempo de geração (minutos) → dimensão aproximada do trabalho. */
+const MINUTES_TO_PAGES: Record<number, number> = { 1: 6, 2: 9, 3: 12, 4: 15, 5: 18 };
+
 function TrabalhosPage() {
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
   const [tema, setTema] = useState("");
-  const [disciplina, setDisciplina] = useState("");
-  const [sizeId, setSizeId] = useState<(typeof WORK_SIZES)[number]["id"]>("p6");
-  const size = WORK_SIZES.find((s) => s.id === sizeId)!;
+  const [curso, setCurso] = useState("");
+  const [descricao, setDescricao] = useState("");
+  const [minutos, setMinutos] = useState(2);
+  const [formato, setFormato] = useState<"pdf" | "docx">("docx");
+
+  const { data: docs } = useQuery({
+    queryKey: ["documents"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("documents")
+        .select("id, tema, curso, pages, created_at")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const gerar = useServerFn(generateWork);
+  const mutation = useMutation({
+    mutationFn: async () =>
+      gerar({ data: { tema: tema.trim(), curso: curso.trim(), descricao: descricao.trim(), pages: MINUTES_TO_PAGES[minutos] } }),
+    onSuccess: (res) => {
+      setOpen(false);
+      qc.invalidateQueries({ queryKey: ["documents"] });
+      toast.success("Documento gerado com sucesso.");
+      navigate({ to: "/documento/$id", params: { id: res.id }, search: { formato } });
+    },
+    onError: (e: Error) => toast.error(e.message || "Não foi possível gerar o trabalho."),
+  });
 
   return (
-    <div className="mx-auto max-w-5xl p-5 pb-28 md:p-10">
+    <div className="mx-auto max-w-4xl p-5 pb-28 md:p-10">
       <div className="mb-6 flex items-start gap-4">
         <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-hero text-primary-foreground shadow-soft">
           <BookOpen className="h-6 w-6" />
         </div>
         <div className="min-w-0">
           <h1 className="font-display text-2xl font-bold md:text-3xl">Trabalhos Académicos</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Escolha o tema e o tamanho — a plataforma gera a estrutura completa.</p>
-        </div>
-      </div>
-
-      <div className="rounded-2xl border bg-card p-5 shadow-soft">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <Label htmlFor="tema">Tema do trabalho</Label>
-            <Input id="tema" value={tema} onChange={(e) => setTema(e.target.value)} placeholder="Ex.: A poluição dos rios em Moçambique" className="mt-1.5" />
-          </div>
-          <div>
-            <Label htmlFor="disc">Disciplina / Curso</Label>
-            <Input id="disc" value={disciplina} onChange={(e) => setDisciplina(e.target.value)} placeholder="Ex.: Biologia, 11.ª classe" className="mt-1.5" />
-          </div>
-        </div>
-      </div>
-
-      <h2 className="mb-3 mt-8 font-display text-xl font-bold">Escolha o tamanho</h2>
-      <div className="grid gap-4 md:grid-cols-3">
-        {WORK_SIZES.map((s) => (
-          <ContentCard
-            key={s.id}
-            item={{ kind: "trabalho", ref: s.id, title: s.title, content: `${s.description}\n\n${s.structure.join("\n")}` }}
-            onEdit={() => setSizeId(s.id)}
-            className={s.id === sizeId ? "ring-2 ring-primary" : ""}
-          >
-            <button onClick={() => setSizeId(s.id)} className="block w-full text-left">
-              <span className="inline-flex rounded-full bg-secondary-soft px-2.5 py-0.5 text-xs font-semibold text-secondary">
-                {s.pages} páginas
-              </span>
-              <h3 className="mt-2 pr-8 font-display text-lg font-bold">{s.title}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{s.description}</p>
-              <ul className="mt-3 space-y-1 text-sm">
-                {s.structure.map((item) => (
-                  <li key={item} className="flex gap-2">
-                    <Check className="h-4 w-4 shrink-0 text-success" /> {item}
-                  </li>
-                ))}
-              </ul>
-            </button>
-          </ContentCard>
-        ))}
-      </div>
-
-      <div className="sticky bottom-20 z-20 mt-6 rounded-2xl border bg-card/95 p-4 shadow-elegant backdrop-blur md:bottom-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-muted-foreground">
-            Selecionado: <strong className="text-foreground">{size.title}</strong>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Indique o tema, o curso e a descrição. A IA gera o documento com capa, índice e capítulos — pronto a editar e descarregar.
           </p>
-          <Button asChild className="bg-gradient-hero" disabled={!tema.trim()}>
-            <Link to="/chat" search={{ start: buildWorkPrompt(size, tema, disciplina) } as never}>
-              <Sparkles className="mr-1 h-4 w-4" /> Gerar trabalho com IA
-            </Link>
-          </Button>
         </div>
-        <p className="mt-2 text-xs text-muted-foreground">
-          <FileDown className="mr-1 inline h-3.5 w-3.5" />
-          O download em PDF está disponível no plano Premium.
-        </p>
       </div>
 
-      <h2 className="mb-3 mt-10 font-display text-xl font-bold">Modelos e orientações</h2>
-      <div className="grid gap-4 md:grid-cols-2">
-        <ContentCard item={{ kind: "modelo", ref: "introducao", title: "Modelo de Introdução", content: MODELO_INTRODUCAO }}>
-          <h3 className="pr-8 font-display text-lg font-bold">Modelo de Introdução</h3>
-          <p className="mt-2 text-sm text-muted-foreground">{MODELO_INTRODUCAO}</p>
-        </ContentCard>
-        <ContentCard item={{ kind: "modelo", ref: "conclusao", title: "Modelo de Conclusão", content: MODELO_CONCLUSAO }}>
-          <h3 className="pr-8 font-display text-lg font-bold">Modelo de Conclusão</h3>
-          <p className="mt-2 text-sm text-muted-foreground">{MODELO_CONCLUSAO}</p>
-        </ContentCard>
-        <ContentCard item={{ kind: "modelo", ref: "referencias", title: "Referências Bibliográficas", content: MODELO_REFERENCIAS.join("\n") }}>
-          <h3 className="pr-8 font-display text-lg font-bold">Referências Bibliográficas</h3>
-          <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-            {MODELO_REFERENCIAS.map((r) => <li key={r}>• {r}</li>)}
-          </ul>
-        </ContentCard>
-        <ContentCard item={{ kind: "modelo", ref: "apendices", title: "Apêndices", content: MODELO_APENDICES.join("\n") }}>
-          <h3 className="pr-8 font-display text-lg font-bold">Apêndices</h3>
-          <p className="mt-2 text-sm text-muted-foreground">Materiais complementares produzidos pelo estudante:</p>
-          <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-            {MODELO_APENDICES.map((r) => <li key={r}>• {r}</li>)}
-          </ul>
-        </ContentCard>
-      </div>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button className="bg-gradient-hero">
+            <Sparkles className="mr-1.5 h-4 w-4" /> Gerar Trabalho
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-display">Novo trabalho académico</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="tema">Tema do trabalho</Label>
+              <Input id="tema" value={tema} onChange={(e) => setTema(e.target.value)} placeholder="Ex.: A poluição dos rios em Moçambique" className="mt-1.5" />
+            </div>
+            <div>
+              <Label htmlFor="curso">Curso</Label>
+              <Input id="curso" value={curso} onChange={(e) => setCurso(e.target.value)} placeholder="Ex.: Biologia, 11.ª classe" className="mt-1.5" />
+            </div>
+            <div>
+              <Label htmlFor="desc">Descrição</Label>
+              <Textarea id="desc" value={descricao} onChange={(e) => setDescricao(e.target.value)} rows={3} placeholder="O que deve ser abordado no trabalho?" className="mt-1.5" />
+            </div>
+            <div>
+              <Label htmlFor="min">Tempo de geração: {minutos} minuto{minutos > 1 ? "s" : ""} (~{MINUTES_TO_PAGES[minutos]} páginas)</Label>
+              <input
+                id="min"
+                type="range"
+                min={1}
+                max={5}
+                step={1}
+                value={minutos}
+                onChange={(e) => setMinutos(Number(e.target.value))}
+                className="mt-2 w-full accent-primary"
+              />
+            </div>
+            <div>
+              <Label>Tipo de documento</Label>
+              <div className="mt-1.5 grid grid-cols-2 gap-2">
+                {(["docx", "pdf"] as const).map((f) => (
+                  <button
+                    key={f}
+                    type="button"
+                    onClick={() => setFormato(f)}
+                    className={`rounded-xl border px-3 py-2 text-sm font-medium ${formato === f ? "border-primary bg-primary/10 text-primary" : "bg-card"}`}
+                  >
+                    {f === "docx" ? "Word (.docx)" : "PDF"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <Button
+              className="w-full bg-gradient-hero"
+              disabled={!tema.trim() || mutation.isPending}
+              onClick={() => mutation.mutate()}
+            >
+              {mutation.isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> A gerar documento...</> : "Gerar documento"}
+            </Button>
+            <p className="text-center text-xs text-muted-foreground">
+              O conteúdo é gerado apenas no documento — não é enviado para o Chat AI.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <h2 className="mb-3 mt-9 font-display text-xl font-bold">Os meus documentos</h2>
+      {!docs?.length ? (
+        <div className="rounded-2xl border bg-card p-6 text-center text-sm text-muted-foreground shadow-soft">
+          Ainda não gerou nenhum trabalho. Clique em <strong>Gerar Trabalho</strong> para começar.
+        </div>
+      ) : (
+        <div className="grid gap-3">
+          {docs.map((d) => (
+            <Link
+              key={d.id}
+              to="/documento/$id"
+              params={{ id: d.id }}
+              className="flex items-center gap-3 rounded-2xl border bg-card p-4 shadow-soft transition hover:bg-accent"
+            >
+              <FileText className="h-5 w-5 shrink-0 text-primary" />
+              <div className="min-w-0">
+                <p className="truncate font-medium">{d.tema}</p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {d.curso || "Sem curso"} • {d.pages} páginas • {new Date(d.created_at).toLocaleDateString("pt-PT")}
+                </p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
