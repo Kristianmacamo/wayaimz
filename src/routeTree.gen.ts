@@ -30,6 +30,7 @@ import { Route as AppChatRouteImport } from './routes/_app.chat'
 import { Route as AppAfiliadosRouteImport } from './routes/_app.afiliados'
 import { Route as AppAdminRouteImport } from './routes/_app.admin'
 import { Route as AppFormulasIdRouteImport } from './routes/_app.formulas.$id'
+import { Route as AppDocumentoIdRouteImport } from './routes/_app.documento.$id'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -135,6 +136,11 @@ const AppFormulasIdRoute = AppFormulasIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AppFormulasRoute,
 } as any)
+const AppDocumentoIdRoute = AppDocumentoIdRouteImport.update({
+  id: '/documento/$id',
+  path: '/documento/$id',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -156,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/testes': typeof AppTestesRoute
   '/trabalhos': typeof AppTrabalhosRoute
   '/api/chat': typeof ApiChatRoute
+  '/documento/$id': typeof AppDocumentoIdRoute
   '/formulas/$id': typeof AppFormulasIdRoute
 }
 export interface FileRoutesByTo {
@@ -178,6 +185,7 @@ export interface FileRoutesByTo {
   '/testes': typeof AppTestesRoute
   '/trabalhos': typeof AppTrabalhosRoute
   '/api/chat': typeof ApiChatRoute
+  '/documento/$id': typeof AppDocumentoIdRoute
   '/formulas/$id': typeof AppFormulasIdRoute
 }
 export interface FileRoutesById {
@@ -202,6 +210,7 @@ export interface FileRoutesById {
   '/_app/testes': typeof AppTestesRoute
   '/_app/trabalhos': typeof AppTrabalhosRoute
   '/api/chat': typeof ApiChatRoute
+  '/_app/documento/$id': typeof AppDocumentoIdRoute
   '/_app/formulas/$id': typeof AppFormulasIdRoute
 }
 export interface FileRouteTypes {
@@ -226,6 +235,7 @@ export interface FileRouteTypes {
     | '/testes'
     | '/trabalhos'
     | '/api/chat'
+    | '/documento/$id'
     | '/formulas/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -248,6 +258,7 @@ export interface FileRouteTypes {
     | '/testes'
     | '/trabalhos'
     | '/api/chat'
+    | '/documento/$id'
     | '/formulas/$id'
   id:
     | '__root__'
@@ -271,6 +282,7 @@ export interface FileRouteTypes {
     | '/_app/testes'
     | '/_app/trabalhos'
     | '/api/chat'
+    | '/_app/documento/$id'
     | '/_app/formulas/$id'
   fileRoutesById: FileRoutesById
 }
@@ -430,6 +442,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppFormulasIdRouteImport
       parentRoute: typeof AppFormulasRoute
     }
+    '/_app/documento/$id': {
+      id: '/_app/documento/$id'
+      path: '/documento/$id'
+      fullPath: '/documento/$id'
+      preLoaderRoute: typeof AppDocumentoIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
@@ -462,6 +481,7 @@ interface AppRouteChildren {
   AppSuporteRoute: typeof AppSuporteRoute
   AppTestesRoute: typeof AppTestesRoute
   AppTrabalhosRoute: typeof AppTrabalhosRoute
+  AppDocumentoIdRoute: typeof AppDocumentoIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -481,6 +501,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppSuporteRoute: AppSuporteRoute,
   AppTestesRoute: AppTestesRoute,
   AppTrabalhosRoute: AppTrabalhosRoute,
+  AppDocumentoIdRoute: AppDocumentoIdRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

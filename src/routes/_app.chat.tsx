@@ -4,8 +4,8 @@ import { DefaultChatTransport } from "ai";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Sparkles, Loader2, Search, X } from "lucide-react";
-import ReactMarkdown from "react-markdown";
+import { Send, Sparkles, Loader2, Search, X, ImagePlus, Camera } from "lucide-react";
+import { RichText } from "@/components/RichText";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -132,7 +132,23 @@ function ChatPage() {
             return (
               <div key={m.id} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
                 <div className={`max-w-[85%] ${isUser ? "rounded-2xl rounded-tr-sm bg-primary px-4 py-2.5 text-primary-foreground shadow-soft" : "prose prose-sm max-w-none"}`}>
-                  {isUser ? <p className="whitespace-pre-wrap">{text}</p> : <ReactMarkdown>{text}</ReactMarkdown>}
+                  {isUser ? (
+                    <>
+                      {m.parts
+                        .filter((p) => p.type === "file" && p.mediaType?.startsWith("image/"))
+                        .map((p, idx) => (
+                          <img
+                            key={idx}
+                            src={(p as { url: string }).url}
+                            alt="Imagem enviada pelo estudante"
+                            className="mb-2 max-h-56 rounded-xl object-contain"
+                          />
+                        ))}
+                      {text && <p className="whitespace-pre-wrap">{text}</p>}
+                    </>
+                  ) : (
+                    <RichText>{text}</RichText>
+                  )}
                 </div>
               </div>
             );
