@@ -87,38 +87,39 @@ export const generateWork = createServerFn({ method: "POST" })
       "Introdução",
       "Objetivos",
       "Desenvolvimento",
-      "Capítulo 1",
-      "Capítulo 2",
-      "Capítulo 3",
       "Conclusão",
       "Referências Bibliográficas",
-      "Apêndices",
-      "Anexos",
     ];
 
-    const results: { title: string; body: string }[] = [];
-    for (const section of SECTIONS) {
-      const body = await runAi({
-        system: "És um professor universitário que redige trabalhos académicos completos em português de Moçambique, seguindo a norma APA 7.",
-        prompt: [
-          `Trabalho académico com aproximadamente ${data.pages} páginas.`,
-          `Tema: ${data.tema}`,
-          `Curso/Disciplina: ${data.curso || "não indicado"}`,
-          `Descrição pedida pelo estudante: ${data.descricao || "não indicada"}`,
-          "",
-          `Escreve APENAS a secção "${section}" do trabalho, com conteúdo completo e pronto a entregar.`,
-          section === "Capa"
-            ? "Na capa apresenta: nome da instituição, curso, tema, nome do estudante (deixa ___), docente (deixa ___), local e ano."
-            : "",
-          section === "Índice" ? "Lista as secções do trabalho numeradas, sem números de página inventados." : "",
-          section === "Referências Bibliográficas" ? "Usa exclusivamente o formato APA 7." : "",
-          "Não escrevas o título da secção — apenas o conteúdo.",
-        ]
-          .filter(Boolean)
-          .join("\n"),
-      });
-      results.push({ title: section, body });
-    }
+    const results = await Promise.all(
+      SECTIONS.map(async (section) => {
+        const body = await runAi({
+          system: "És um professor universitário que redige trabalhos académicos completos em português de Moçambique, seguindo a norma APA 7.",
+          prompt: [
+            `Trabalho académico com aproximadamente ${data.pages} páginas.`,
+            `Tema: ${data.tema}`,
+            `Curso/Disciplina: ${data.curso || "não indicado"}`,
+            `Descrição pedida pelo estudante: ${data.descricao || "não indicada"}`,
+            "",
+            `Escreve APENAS a secção "${section}" do trabalho, com conteúdo completo e pronto a entregar.`,
+            section === "Capa"
+              ? "Na capa apresenta: nome da instituição, curso, tema, nome do estudante (deixa ___), docente (deixa ___), local e ano."
+              : "",
+            section === "Índice"
+              ? "Lista estas secções numeradas, sem números de página inventados: Introdução, Objetivos, Desenvolvimento, Conclusão, Referências Bibliográficas."
+              : "",
+            section === "Desenvolvimento"
+              ? `Divide o desenvolvimento em 3 capítulos com subtítulos (###) e conteúdo extenso, adequado a ${data.pages} páginas.`
+              : "",
+            section === "Referências Bibliográficas" ? "Usa exclusivamente o formato APA 7." : "",
+            "Não escrevas o título da secção — apenas o conteúdo.",
+          ]
+            .filter(Boolean)
+            .join("\n"),
+        });
+        return { title: section, body };
+      }),
+    );
 
     const { data: doc, error } = await supabase
       .from("documents")
