@@ -32,6 +32,30 @@ function DocumentoPage() {
   const [sections, setSections] = useState<DocSection[]>([]);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [exporting, setExporting] = useState<"pdf" | "docx" | null>(null);
+
+  async function handleExport(kind: "pdf" | "docx") {
+    if (!doc) return;
+    if (!sections.length) {
+      toast.error("Documento vazio", { description: "Gere novamente o trabalho antes de exportar." });
+      return;
+    }
+    setExporting(kind);
+    const id = toast.loading(kind === "pdf" ? "A preparar o PDF..." : "A preparar o ficheiro Word...");
+    try {
+      if (kind === "pdf") await exportPdf(doc.tema, sections);
+      else await exportWord(doc.tema, sections);
+      toast.success("Transferência iniciada.", { id });
+    } catch (e) {
+      toast.error("Não foi possível exportar", {
+        id,
+        description: e instanceof Error ? e.message : "Verifique a ligação à internet e tente novamente.",
+      });
+    } finally {
+      setExporting(null);
+    }
+  }
+
 
   const { data: doc, isLoading } = useQuery({
     queryKey: ["document", id],
@@ -93,19 +117,22 @@ function DocumentoPage() {
         <Button
           size="sm"
           variant={formato === "docx" ? "default" : "outline"}
-          onClick={() => exportWord(doc.tema, sections)}
+          onClick={() => handleExport("docx")}
+          disabled={exporting !== null}
           className={formato === "docx" ? "bg-gradient-hero" : ""}
         >
-          <Download className="mr-1.5 h-4 w-4" /> Word (.docx)
+          {exporting === "docx" ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Download className="mr-1.5 h-4 w-4" />} Word (.docx)
         </Button>
         <Button
           size="sm"
           variant={formato === "pdf" ? "default" : "outline"}
-          onClick={() => exportPdf(doc.tema, sections)}
+          onClick={() => handleExport("pdf")}
+          disabled={exporting !== null}
           className={formato === "pdf" ? "bg-gradient-hero" : ""}
         >
-          <Download className="mr-1.5 h-4 w-4" /> PDF
+          {exporting === "pdf" ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Download className="mr-1.5 h-4 w-4" />} PDF
         </Button>
+
       </div>
 
       <div className="mt-6 space-y-7 rounded-2xl border bg-card p-5 shadow-soft md:p-8">

@@ -27,7 +27,18 @@ export const Route = createFileRoute("/_app/trabalhos")({
 });
 
 /** Tempo de geração (minutos) → dimensão aproximada do trabalho. */
-const MINUTES_TO_PAGES: Record<number, number> = { 1: 6, 2: 9, 3: 12, 4: 15, 5: 18 };
+const MINUTES_TO_PAGES: Record<number, number> = { 1: 9, 2: 12, 3: 15, 4: 18, 5: 21 };
+
+/** Traduz erros técnicos em mensagens claras com o próximo passo. */
+function friendlyError(e: unknown) {
+  const msg = e instanceof Error ? e.message : String(e ?? "");
+  if (/cr[ée]dito/i.test(msg)) return "Ficou sem créditos. Vá a Planos e ative um plano para continuar.";
+  if (/suspens/i.test(msg)) return "A sua conta está suspensa. Contacte o suporte pelo WhatsApp +258 84 477 2002.";
+  if (/unauthorized|401|sess/i.test(msg)) return "A sessão expirou. Saia e volte a entrar na sua conta.";
+  if (/perfil/i.test(msg)) return "Perfil não encontrado. Complete o seu perfil e tente novamente.";
+  if (/fetch|network|timeout|failed/i.test(msg)) return "Falha de ligação. Verifique a internet e tente novamente.";
+  return msg || "Ocorreu um erro inesperado. Tente novamente dentro de instantes.";
+}
 
 function TrabalhosPage() {
   const navigate = useNavigate();
@@ -64,7 +75,8 @@ function TrabalhosPage() {
       toast.success("Documento gerado com sucesso.");
       navigate({ to: "/documento/$id", params: { id: res.id }, search: { formato } });
     },
-    onError: (e: Error) => toast.error(e.message || "Não foi possível gerar o trabalho."),
+    onError: (e: Error) =>
+      toast.error("Não foi possível gerar o trabalho", { description: friendlyError(e) }),
   });
 
   useEffect(() => {
@@ -151,6 +163,11 @@ function TrabalhosPage() {
                 "Gerar documento"
               )}
             </Button>
+            {mutation.isError && !mutation.isPending && (
+              <p className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
+                {friendlyError(mutation.error)}
+              </p>
+            )}
             {mutation.isPending && (
               <p className="text-center text-xs text-muted-foreground">
                 A escrever capa, índice e capítulos. Pode demorar 1 a 3 minutos — não feche esta janela.
