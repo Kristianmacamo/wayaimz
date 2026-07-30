@@ -5,6 +5,7 @@ export type DocSection = { title: string; body: string };
 
 /** Exporta para PDF (A4, texto simples e legível). */
 export async function exportPdf(title: string, sections: DocSection[]) {
+  if (!sections.length) throw new Error("O documento ainda não tem conteúdo para exportar.");
   const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const margin = 20;
@@ -44,11 +45,16 @@ export async function exportPdf(title: string, sections: DocSection[]) {
     y += 6;
   }
 
-  doc.save(`${title.slice(0, 60) || "documento"}.pdf`);
+  try {
+    doc.save(`${title.slice(0, 60) || "documento"}.pdf`);
+  } catch {
+    throw new Error("O navegador bloqueou a transferência do PDF. Permita downloads e tente novamente.");
+  }
 }
 
 /** Exporta para Word (.docx). */
 export async function exportWord(title: string, sections: DocSection[]) {
+  if (!sections.length) throw new Error("O documento ainda não tem conteúdo para exportar.");
   const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } = await import("docx");
 
   const children: InstanceType<typeof Paragraph>[] = [
@@ -89,5 +95,9 @@ export async function exportWord(title: string, sections: DocSection[]) {
   });
 
   const blob = await Packer.toBlob(doc);
-  saveAs(blob, `${title.slice(0, 60) || "documento"}.docx`);
+  try {
+    saveAs(blob, `${title.slice(0, 60) || "documento"}.docx`);
+  } catch {
+    throw new Error("O navegador bloqueou a transferência do ficheiro Word. Permita downloads e tente novamente.");
+  }
 }
