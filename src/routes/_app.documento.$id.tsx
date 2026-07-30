@@ -117,19 +117,22 @@ function DocumentoPage() {
         <Button
           size="sm"
           variant={formato === "docx" ? "default" : "outline"}
-          onClick={() => exportWord(doc.tema, sections)}
+          onClick={() => handleExport("docx")}
+          disabled={exporting !== null}
           className={formato === "docx" ? "bg-gradient-hero" : ""}
         >
-          <Download className="mr-1.5 h-4 w-4" /> Word (.docx)
+          {exporting === "docx" ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Download className="mr-1.5 h-4 w-4" />} Word (.docx)
         </Button>
         <Button
           size="sm"
           variant={formato === "pdf" ? "default" : "outline"}
-          onClick={() => exportPdf(doc.tema, sections)}
+          onClick={() => handleExport("pdf")}
+          disabled={exporting !== null}
           className={formato === "pdf" ? "bg-gradient-hero" : ""}
         >
-          <Download className="mr-1.5 h-4 w-4" /> PDF
+          {exporting === "pdf" ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Download className="mr-1.5 h-4 w-4" />} PDF
         </Button>
+
       </div>
 
       <div className="mt-6 space-y-7 rounded-2xl border bg-card p-5 shadow-soft md:p-8">
