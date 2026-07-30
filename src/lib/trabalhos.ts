@@ -9,15 +9,15 @@ export type WorkSize = {
 export const WORK_SIZES: WorkSize[] = [
   {
     id: "p6",
-    pages: 6,
-    title: "Trabalho de 6 Páginas",
+    pages: 9,
+    title: "Trabalho de 9 Páginas",
     description: "Ideal para TPCs, relatórios curtos e atividades de sala de aula.",
     structure: ["Capa", "Índice", "Introdução", "Desenvolvimento", "Conclusão", "Referências bibliográficas"],
   },
   {
     id: "p12",
-    pages: 12,
-    title: "Trabalho de 12 Páginas",
+    pages: 15,
+    title: "Trabalho de 15 Páginas",
     description: "Recomendado para trabalhos de módulo, seminários e relatórios mais detalhados.",
     structure: [
       "Capa",
@@ -29,13 +29,12 @@ export const WORK_SIZES: WorkSize[] = [
       "Exemplos práticos",
       "Conclusão",
       "Referências bibliográficas",
-      "Apêndices",
     ],
   },
   {
     id: "p18",
-    pages: 18,
-    title: "Trabalho de 18 Páginas",
+    pages: 21,
+    title: "Trabalho de 21 Páginas",
     description: "Adequado para projetos finais, relatórios de estágio e trabalhos de investigação.",
     structure: [
       "Capa",
@@ -49,7 +48,6 @@ export const WORK_SIZES: WorkSize[] = [
       "Análise e discussão",
       "Conclusão",
       "Referências bibliográficas",
-      "Apêndices",
     ],
   },
 ];
@@ -66,13 +64,6 @@ export const MODELO_REFERENCIAS = [
   "Site oficial consultado (com data de acesso).",
 ];
 
-export const MODELO_APENDICES = [
-  "Questionários",
-  "Tabelas",
-  "Cálculos completos",
-  "Imagens",
-  "Documentos de apoio",
-];
 
 export function buildWorkPrompt(size: WorkSize, tema: string, disciplina: string) {
   return [

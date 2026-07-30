@@ -23,17 +23,17 @@ function SuportePage() {
         <Card className="p-4 text-center">
           <MessageCircle className="mx-auto h-7 w-7 text-secondary" />
           <p className="mt-2 text-sm font-semibold">WhatsApp</p>
-          <a href="https://wa.me/258840000000" className="text-xs text-primary hover:underline">+258 84 000 0000</a>
+          <a href="https://wa.me/258844772002" className="text-xs text-primary hover:underline">+258 84 477 2002</a>
         </Card>
         <Card className="p-4 text-center">
           <Mail className="mx-auto h-7 w-7 text-primary" />
           <p className="mt-2 text-sm font-semibold">Email</p>
-          <a href="mailto:apoio@wayestudantes.co.mz" className="text-xs text-primary hover:underline">apoio@wayestudantes.co.mz</a>
+          <a href="mailto:tendigitalmz@gmail.com" className="text-xs text-primary hover:underline">tendigitalmz@gmail.com</a>
         </Card>
         <Card className="p-4 text-center">
           <Phone className="mx-auto h-7 w-7 text-secondary" />
           <p className="mt-2 text-sm font-semibold">Telefone</p>
-          <p className="text-xs text-muted-foreground">+258 84 000 0000</p>
+          <p className="text-xs text-muted-foreground">+258 84 477 2002</p>
         </Card>
       </div>
 
@@ -49,7 +49,7 @@ function SuportePage() {
 
       <Card className="mt-8 border-primary/30 bg-gradient-card p-5 text-center">
         <p className="text-sm">Não encontrou a sua resposta?</p>
-        <a href="https://wa.me/258840000000" target="_blank" rel="noreferrer">
+        <a href="https://wa.me/258844772002" target="_blank" rel="noreferrer">
           <Button className="mt-3 bg-gradient-hero">Falar no WhatsApp</Button>
         </a>
       </Card>

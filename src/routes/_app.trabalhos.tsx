@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_app/trabalhos")({
 });
 
 /** Tempo de geração (minutos) → dimensão aproximada do trabalho. */
-const MINUTES_TO_PAGES: Record<number, number> = { 1: 6, 2: 9, 3: 12, 4: 15, 5: 18 };
+const MINUTES_TO_PAGES: Record<number, number> = { 1: 9, 2: 12, 3: 15, 4: 18, 5: 21 };
 
 function TrabalhosPage() {
   const navigate = useNavigate();
