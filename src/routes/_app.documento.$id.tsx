@@ -32,6 +32,30 @@ function DocumentoPage() {
   const [sections, setSections] = useState<DocSection[]>([]);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [exporting, setExporting] = useState<"pdf" | "docx" | null>(null);
+
+  async function handleExport(kind: "pdf" | "docx") {
+    if (!doc) return;
+    if (!sections.length) {
+      toast.error("Documento vazio", { description: "Gere novamente o trabalho antes de exportar." });
+      return;
+    }
+    setExporting(kind);
+    const id = toast.loading(kind === "pdf" ? "A preparar o PDF..." : "A preparar o ficheiro Word...");
+    try {
+      if (kind === "pdf") await exportPdf(doc.tema, sections);
+      else await exportWord(doc.tema, sections);
+      toast.success("Transferência iniciada.", { id });
+    } catch (e) {
+      toast.error("Não foi possível exportar", {
+        id,
+        description: e instanceof Error ? e.message : "Verifique a ligação à internet e tente novamente.",
+      });
+    } finally {
+      setExporting(null);
+    }
+  }
+
 
   const { data: doc, isLoading } = useQuery({
     queryKey: ["document", id],
