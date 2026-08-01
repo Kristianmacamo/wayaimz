@@ -102,9 +102,9 @@ function LandingPage() {
             <p className="mt-2 text-muted-foreground">Escolha o plano que melhor se adequa ao seu estudo.</p>
           </div>
           <div className="grid gap-5 md:grid-cols-3">
-            {(["free", "basico", "premium"] as const).map((id) => {
+            {(["semanal", "semanal_premium", "mensal_premium"] as const).map((id) => {
               const p = PLANS[id];
-              const featured = id === "premium";
+              const featured = id === "mensal_premium";
               return (
                 <div key={id} className={`relative rounded-2xl border bg-card p-6 ${featured ? "shadow-elegant ring-2 ring-primary" : "shadow-soft"}`}>
                   {featured && <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-hero px-3 py-1 text-xs font-semibold text-primary-foreground">Mais popular</span>}
