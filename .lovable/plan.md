@@ -1,73 +1,69 @@
-## Objetivo
+# Integração M-Pesa (API oficial) — Way Estudantes AI
 
-Reconstruir o Way Estudantes AI com áreas totalmente separadas (Chat, TPC, Trabalhos, Testes, Exames, Fórmulas), fórmulas apresentadas em formato matemático real e uma interface moderna com histórico e exportação.
+Pagamento automático por M-Pesa: o estudante escolhe o plano, introduz o número, confirma no telemóvel e o acesso é activado na hora. Ambiente **produção (live)** desde o início.
 
-## 1. Corrigir a renderização das fórmulas
+## Antes de começar
 
-Hoje o chat usa Markdown simples, por isso o LaTeX (`$`, `\Delta`, `\frac`, `\sqrt`, `\cdot`) aparece como texto cru.
+Preciso de 3 segredos (guardados como Secrets, nunca no frontend):
 
-- Adicionar renderização matemática real (KaTeX) a todas as respostas da IA e às páginas de fórmulas: `Δ = b² − 4ac` e frações/raízes aparecem desenhadas, nunca como código.
-- Rede de segurança: um conversor que transforma qualquer LaTeX restante em texto legível (`\frac{a}{b}` → `(a) / (b)`, `\sqrt{x}` → `√x`, `\cdot` → `×`, remove `$`).
-- Reforçar as instruções da IA para escrever matemática limpa.
-- Cada fórmula/bloco de resolução dentro da sua própria caixa, separada por espaço — sem linhas horizontais.
+- `MPESA_API_KEY`
+- `MPESA_PUBLIC_KEY`
+- `MPESA_SERVICE_PROVIDER_CODE`
 
-## 2. Chat com IA (página independente)
+Vou pedi-los na primeira etapa da implementação. Sem eles a integração não pode ser testada.
 
-`/chat` passa a ser só conversa, sem misturar Trabalhos/TPC/Fórmulas.
+## Planos (substituem os actuais)
 
-- Escrever pergunta, carregar fotografia, PDF e Word.
-- Fotografia: a IA lê a imagem, reconhece o texto, resolve e explica passo a passo (modelo multimodal).
-- PDF/Word: texto extraído e enviado como contexto.
-- Histórico de conversas (lista lateral, várias conversas), copiar resposta, regenerar resposta.
-- Respostas longas e organizadas com títulos, parágrafos e caixas.
+| Plano | Preço | Duração |
+|---|---|---|
+| Semanal | 65 MT | 7 dias |
+| Semanal Premium | 180 MT | 7 dias |
+| Mensal Premium | 300 MT | 30 dias |
 
-## 3. TPC (`/tpc`)
+O plano Gratuito deixa de existir como plano pago; os utilizadores sem assinatura activa ficam sem acesso às funcionalidades premium (mantêm os créditos que já têm).
 
-Página própria: pergunta escrita, fotografia, PDF ou Word; resposta passo a passo, com resultado guardado no histórico. Não abre o chat.
+## Base de dados
 
-## 4. Trabalhos Académicos (`/trabalhos`)
+- **subscriptions** (nova): utilizador, plano, valor, estado (activa / expirada / cancelada), data de início, data de fim, referência de pagamento.
+- **payments** (reescrita): utilizador, número de telefone, valor, fornecedor, id da transação M-Pesa, referência, estado (pendente / a processar / concluído / falhado), resposta da API guardada para auditoria.
+- Regras de acesso: cada utilizador só vê os seus pagamentos e assinaturas; o administrador vê tudo. Só o servidor pode criar ou alterar registos de pagamento.
+- Função automática que marca assinaturas como expiradas quando passa a data de fim, e helper `has_active_subscription` usado pelas restantes regras.
+- Remoção do fluxo manual: colunas de comprovativo/código, aprovação manual e o bucket `mpesa-proofs` deixam de ser usados.
 
-Sem qualquer ligação ao chat.
+## Fluxo de pagamento
 
-- Formulário: Tema, Curso, Descrição (e tamanho 6/12/18 páginas já existente).
-- "Gerar Trabalho" abre uma **página de documento** (`/trabalhos/$id`) que gera: Capa, Índice, Introdução, Objetivos, Desenvolvimento (Capítulos 1–3), Conclusão, Referências (APA 7), Apêndices, Anexos.
-- No documento: visualizar, editar secções, guardar, exportar PDF e exportar Word (.docx).
+```text
+Utilizador escolhe plano
+  -> introduz número M-Pesa (84/85…)
+  -> backend cria pagamento "a processar"
+  -> backend chama a API C2B do M-Pesa (assinada com a Public Key)
+  -> utilizador confirma no telemóvel
+  -> backend valida a resposta (código INS-0 = sucesso)
+  -> grava transaction_id + resposta completa
+  -> cria/renova a assinatura e activa o acesso
+  -> recibo + notificação de sucesso
+```
 
-## 5. Testes (`/testes`) e Exames (`/exames`)
+Erros da API são traduzidos para mensagens claras em português (saldo insuficiente, número inválido, tempo esgotado, transação duplicada) com botão **Tentar novamente**. Enquanto decorre, o ecrã mostra o indicador "A aguardar confirmação no telemóvel".
 
-- Testes: geração automática de perguntas, respostas do aluno, correção, pontuação e explicação.
-- Exames: exame completo com perguntas, resolução, nota final e explicação.
-- Ambos guardados no histórico.
+## Ecrãs
 
-## 6. Fórmulas (`/formulas` e `/formulas/$id`)
+**Planos / Pagamento** — cartões dos 3 planos, botão "Pagar com M-Pesa", campo de número com validação moçambicana, estado de processamento animado, recibo no fim.
 
-Cada fórmula abre uma página completa com: Introdução, Conceito, Quando utilizar, Fórmula (caixa destacada), Explicação das variáveis, Exemplo resolvido, Exercício, Resposta, Dicas, Resumo.
+**Painel do utilizador** — plano actual, estado da assinatura, dias restantes, data de expiração, botão Renovar, histórico de pagamentos com recibo descarregável.
 
-Conteúdo baseado nas 20 fórmulas mais importantes da matemática (Pitágoras, Bhaskara, áreas, juros simples e compostos, relação fundamental da trigonometria, identidade de Euler, Euler para poliedros, etc.), além das categorias já existentes.
+**Painel do administrador** — total de utilizadores, assinaturas activas, total de pagamentos, receita total / diária / mensal / anual, contagens de pendentes / concluídos / falhados, pesquisa por utilizador, exportação Excel e PDF.
 
-## 7. Interface
+Interface em tema escuro, responsiva (telemóvel, tablet, computador), com animações nos botões e estados de carregamento em todas as acções.
 
-Grid layout, menu lateral, tab bar no telemóvel, botão flutuante com bottom sheet, menu de três pontos nos cartões, cartões retangulares, pesquisa inteligente (procura em fórmulas, páginas e histórico), modo claro/escuro e animações suaves.
+## Detalhes técnicos
 
-## 8. Histórico e Perfil
+- Toda a comunicação com o M-Pesa vive no servidor: `src/lib/mpesa.server.ts` (cliente HTTP, encriptação RSA da API Key com a Public Key para gerar o Bearer, mapeamento de códigos de erro) e `src/lib/payments.functions.ts` (`createMpesaPayment`, `getMySubscription`, `listMyPayments`, `adminDashboardStats`) via `createServerFn` com `requireSupabaseAuth`. Não são criadas Edge Functions — o runtime TanStack já é o backend.
+- Callback opcional do M-Pesa em `src/routes/api/public/mpesa-callback.ts`, com verificação da origem/assinatura antes de qualquer escrita; o resultado síncrono da C2B continua a ser a fonte principal.
+- Camada de tipos e catálogo de planos em `src/lib/plans.ts` (reescrito) + hooks `useSubscription` / `useMpesaPayment`.
+- Escritas privilegiadas com o cliente admin carregado dentro do handler, depois de validar a resposta da API.
+- Créditos e comissões de afiliado (10%) continuam a ser atribuídos, agora no momento da confirmação automática.
 
-- Histórico único (`/historico`) com perguntas, TPC, trabalhos, testes, exames, fórmulas, documentos, fotografias e PDFs.
-- Perfil: fotografia, nome, plano, histórico, favoritos e configurações.
+## Fora do âmbito
 
-## 9. Rodapé
-
-Contacto, WhatsApp 844772002, e-mail tendigitalmz@gmail.com, Política de Privacidade, Termos de Utilização, Perguntas Frequentes e Sobre o Way Estudantes AI (páginas próprias).
-
-## 10. Regras de plano
-
-- Fotografias e ficheiros (PDF/Word): apenas planos pagos (65 MT e 299 MT). No plano gratuito aparece um aviso a convidar à subscrição.
-- Exportar PDF e Word: disponível no Básico (65 MT) e no Premium (299 MT).
-
-## Notas técnicas
-
-- Base de dados: nova tabela `documents` (trabalhos gerados, secções, estado), `history_items` (registo transversal) e reutilização de `saved_items` para favoritos; bucket `uploads` privado para imagens/PDF/Word do utilizador. Tudo com RLS por utilizador e GRANTs.
-- Rotas novas: `_app.tpc.tsx`, `_app.historico.tsx`, `_app.formulas.$id.tsx`, `_app.trabalhos.index.tsx`, `_app.trabalhos.$id.tsx`, `privacidade`, `termos`, `faq`, `sobre`.
-- Servidor: `createServerFn` separados para gerar trabalho, testes, exames e respostas de TPC (não passam pelo endpoint de chat); `/api/chat` fica exclusivo da conversa e passa a aceitar imagens.
-- Renderização: `remark-math` + `rehype-katex` com CSS do KaTeX carregado no `__root.tsx`, mais utilitário `sanitizeMath` para o fallback.
-- Exportação: PDF via geração no cliente e Word via ficheiro `.docx` gerado no servidor.
-- Créditos: cada geração (trabalho, teste, exame, TPC) desconta créditos como o chat.
+Reembolsos automáticos e débito recorrente (o M-Pesa C2B exige confirmação manual do utilizador em cada pagamento) — a renovação é feita pelo botão Renovar.
