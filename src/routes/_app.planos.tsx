@@ -28,7 +28,7 @@ function PlanosPage() {
       <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
         {(Object.values(PLANS)).map((p) => {
           const isCurrent = p.id === current;
-          const highlight = p.id === "premium";
+          const highlight = p.id === "mensal_premium";
           return (
             <Card key={p.id} className={`relative flex flex-col p-6 ${highlight ? "border-primary shadow-elegant ring-2 ring-primary/20" : ""}`}>
               {highlight && (

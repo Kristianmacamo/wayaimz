@@ -185,45 +185,51 @@ export type Database = {
       }
       payments: {
         Row: {
-          amount_mt: number
-          approved_at: string | null
-          approved_by: string | null
+          amount: number
+          api_response: Json | null
+          conversation_id: string | null
           created_at: string
+          error_message: string | null
           id: string
-          method: Database["public"]["Enums"]["payment_method"]
-          plan: Database["public"]["Enums"]["plan_tier"]
-          proof_url: string | null
-          reference: string | null
-          status: Database["public"]["Enums"]["payment_status"]
-          transaction_code: string | null
+          payment_reference: string
+          phone_number: string
+          plan: string
+          provider: string
+          status: string
+          transaction_id: string | null
+          updated_at: string
           user_id: string
         }
         Insert: {
-          amount_mt: number
-          approved_at?: string | null
-          approved_by?: string | null
+          amount: number
+          api_response?: Json | null
+          conversation_id?: string | null
           created_at?: string
+          error_message?: string | null
           id?: string
-          method: Database["public"]["Enums"]["payment_method"]
-          plan: Database["public"]["Enums"]["plan_tier"]
-          proof_url?: string | null
-          reference?: string | null
-          status?: Database["public"]["Enums"]["payment_status"]
-          transaction_code?: string | null
+          payment_reference: string
+          phone_number: string
+          plan: string
+          provider?: string
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string
           user_id: string
         }
         Update: {
-          amount_mt?: number
-          approved_at?: string | null
-          approved_by?: string | null
+          amount?: number
+          api_response?: Json | null
+          conversation_id?: string | null
           created_at?: string
+          error_message?: string | null
           id?: string
-          method?: Database["public"]["Enums"]["payment_method"]
-          plan?: Database["public"]["Enums"]["plan_tier"]
-          proof_url?: string | null
-          reference?: string | null
-          status?: Database["public"]["Enums"]["payment_status"]
-          transaction_code?: string | null
+          payment_reference?: string
+          phone_number?: string
+          plan?: string
+          provider?: string
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -235,7 +241,7 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           credits: number
-          current_plan: Database["public"]["Enums"]["plan_tier"]
+          current_plan: string
           email: string
           emoji: string | null
           free_chats_used: number
@@ -254,7 +260,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           credits?: number
-          current_plan?: Database["public"]["Enums"]["plan_tier"]
+          current_plan?: string
           email: string
           emoji?: string | null
           free_chats_used?: number
@@ -273,7 +279,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           credits?: number
-          current_plan?: Database["public"]["Enums"]["plan_tier"]
+          current_plan?: string
           email?: string
           emoji?: string | null
           free_chats_used?: number
@@ -332,6 +338,56 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          amount: number
+          created_at: string
+          end_date: string
+          id: string
+          payment_id: string | null
+          payment_reference: string | null
+          plan: string
+          start_date: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          end_date: string
+          id?: string
+          payment_id?: string | null
+          payment_reference?: string | null
+          plan: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          end_date?: string
+          id?: string
+          payment_id?: string | null
+          payment_reference?: string | null
+          plan?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -358,8 +414,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      approve_payment: { Args: { _payment_id: string }; Returns: undefined }
+      expire_subscriptions: { Args: never; Returns: undefined }
       generate_affiliate_code: { Args: never; Returns: string }
+      has_active_subscription: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -368,7 +425,6 @@ export type Database = {
         Returns: boolean
       }
       mark_commission_paid: { Args: { _id: string }; Returns: undefined }
-      reject_payment: { Args: { _payment_id: string }; Returns: undefined }
       toggle_user_suspension: {
         Args: { _suspended: boolean; _user_id: string }
         Returns: undefined

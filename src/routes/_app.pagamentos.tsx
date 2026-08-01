@@ -1,83 +1,135 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { PLANS, type PlanId } from "@/lib/plans";
+import { PLANS, PAID_PLAN_IDS, PAYMENT_STATUS_LABEL, isPaidPlan, type PaidPlanId } from "@/lib/plans";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Smartphone, CheckCircle2 } from "lucide-react";
+import { Smartphone, CheckCircle2, Loader2, ShieldCheck, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { notifyAdminPayment } from "@/lib/notify.functions";
+import { startMpesaPayment } from "@/lib/payments.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/pagamentos")({
   component: PagamentosPage,
+  head: () => ({
+    meta: [
+      { title: "Pagamentos M-Pesa | Way Estudantes AI" },
+      { name: "description", content: "Pague o seu plano do Way Estudantes AI directamente por M-Pesa e active o acesso na hora." },
+      { property: "og:title", content: "Pagamentos M-Pesa | Way Estudantes AI" },
+      { property: "og:description", content: "Active o seu plano académico em segundos com o M-Pesa." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   validateSearch: (s: Record<string, unknown>) => ({
-    plan: (typeof s.plan === "string" ? s.plan : "premium") as PlanId,
+    plan: (typeof s.plan === "string" && isPaidPlan(s.plan) ? s.plan : "semanal_premium") as PaidPlanId,
   }),
 });
-
-const WHATSAPP_NUMBER = "258844772002";
 
 function PagamentosPage() {
   const { plan } = Route.useSearch();
   const qc = useQueryClient();
-  const selected = PLANS[plan as PlanId] ?? PLANS.premium;
+  const [selectedId, setSelectedId] = useState<PaidPlanId>(plan);
+  const selected = PLANS[selectedId];
 
   const { data: payments } = useQuery({
     queryKey: ["my-payments"],
     queryFn: async () =>
-      (await supabase.from("payments").select("*").order("created_at", { ascending: false })).data ?? [],
+      (await supabase.from("payments").select("*").order("created_at", { ascending: false }).limit(20)).data ?? [],
+  });
+
+  const { data: subscription } = useQuery({
+    queryKey: ["my-subscription"],
+    queryFn: async () =>
+      (
+        await supabase
+          .from("subscriptions")
+          .select("*")
+          .eq("status", "activa")
+          .order("end_date", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      ).data,
   });
 
   return (
     <div className="mx-auto max-w-3xl p-6 md:p-10">
-      <h1 className="font-display text-3xl font-bold">Pagamento via M-Pesa</h1>
+      <h1 className="font-display text-3xl font-bold">Pagamento por M-Pesa</h1>
       <p className="mt-1 text-muted-foreground">
-        Pagamento manual e seguro. Após confirmação (até 24h), o seu plano é activado automaticamente.
+        Pagamento automático e seguro. Confirme no seu telemóvel e o plano é activado imediatamente.
       </p>
 
-      <Card className="mt-6 border-primary/30 bg-gradient-card p-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground">Plano selecionado</p>
-            <p className="font-display text-xl font-bold">{selected.name}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-2xl font-bold">{selected.price} MT</p>
-            {selected.period && <p className="text-xs text-muted-foreground">{selected.period}</p>}
-          </div>
-        </div>
-        <Link to="/planos" className="mt-3 inline-block text-sm text-primary hover:underline">
-          Alterar plano
-        </Link>
-      </Card>
+      {subscription && (
+        <Card className="mt-6 flex items-center gap-3 border-secondary/40 bg-secondary-soft/40 p-4">
+          <ShieldCheck className="h-5 w-5 text-secondary" />
+          <p className="text-sm">
+            Plano <strong className="capitalize">{PLANS[subscription.plan as PaidPlanId]?.name ?? subscription.plan}</strong> activo até{" "}
+            <strong>{new Date(subscription.end_date).toLocaleDateString("pt-PT")}</strong>.
+          </p>
+        </Card>
+      )}
 
-      <div className="mt-6">
-        <MpesaForm planId={selected.id} amount={selected.price} onSent={() => qc.invalidateQueries({ queryKey: ["my-payments"] })} />
+      <div className="mt-6 grid gap-3 sm:grid-cols-3">
+        {PAID_PLAN_IDS.map((id) => {
+          const p = PLANS[id];
+          const active = id === selectedId;
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setSelectedId(id)}
+              className={`rounded-xl border p-4 text-left transition ${active ? "border-primary bg-primary/5 ring-2 ring-primary/30" : "hover:border-primary/40"}`}
+            >
+              <p className="text-sm font-semibold">{p.name}</p>
+              <p className="mt-1 text-2xl font-bold">{p.price} MT</p>
+              <p className="text-xs text-muted-foreground">
+                / {p.period} · {p.credits} créditos
+              </p>
+            </button>
+          );
+        })}
       </div>
 
-      <h2 className="mt-10 font-display text-xl font-bold">Meus pagamentos</h2>
+      <Link to="/planos" className="mt-3 inline-block text-sm text-primary hover:underline">
+        Ver detalhes dos planos
+      </Link>
+
+      <div className="mt-6">
+        <MpesaForm
+          planId={selected.id}
+          amount={selected.price}
+          onDone={() => {
+            qc.invalidateQueries({ queryKey: ["my-payments"] });
+            qc.invalidateQueries({ queryKey: ["my-subscription"] });
+            qc.invalidateQueries({ queryKey: ["my-profile"] });
+          }}
+        />
+      </div>
+
+      <h2 className="mt-10 font-display text-xl font-bold">Histórico de pagamentos</h2>
       <div className="mt-3 space-y-2">
         {(!payments || payments.length === 0) && (
-          <p className="text-sm text-muted-foreground">Ainda não submeteu nenhum pagamento.</p>
+          <p className="text-sm text-muted-foreground">Ainda não efectuou nenhum pagamento.</p>
         )}
         {payments?.map((p) => (
-          <Card key={p.id} className="flex items-center justify-between p-4">
+          <Card key={p.id} className="flex items-center justify-between gap-3 p-4">
             <div>
-              <p className="font-medium capitalize">
-                {p.plan} — {p.amount_mt} MT
+              <p className="font-medium">
+                {PLANS[p.plan as PaidPlanId]?.name ?? p.plan} — {p.amount} MT
               </p>
               <p className="text-xs text-muted-foreground">
-                {new Date(p.created_at).toLocaleString("pt-PT")} · {p.method.toUpperCase()} · Ref: {p.reference}
+                {new Date(p.created_at).toLocaleString("pt-PT")} · {p.phone_number} · Ref: {p.payment_reference}
               </p>
+              {p.error_message && <p className="mt-1 text-xs text-destructive">{p.error_message}</p>}
             </div>
             <Badge
-              variant={p.status === "aprovado" ? "default" : p.status === "rejeitado" ? "destructive" : "secondary"}
+              variant={p.status === "concluido" ? "default" : p.status === "falhado" ? "destructive" : "secondary"}
             >
-              {p.status === "aprovado" && <CheckCircle2 className="mr-1 h-3 w-3" />}
-              {p.status}
+              {p.status === "concluido" && <CheckCircle2 className="mr-1 h-3 w-3" />}
+              {p.status === "falhado" && <XCircle className="mr-1 h-3 w-3" />}
+              {PAYMENT_STATUS_LABEL[p.status] ?? p.status}
             </Badge>
           </Card>
         ))}
@@ -86,125 +138,92 @@ function PagamentosPage() {
   );
 }
 
-function MpesaForm({ planId, amount, onSent }: { planId: PlanId; amount: number; onSent: () => void }) {
-  const [code, setCode] = useState("");
-  const [file, setFile] = useState<File | null>(null);
+function MpesaForm({ planId, amount, onDone }: { planId: PaidPlanId; amount: number; onDone: () => void }) {
+  const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState(false);
-  const notify = useServerFn(notifyAdminPayment);
+  const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const pay = useServerFn(startMpesaPayment);
 
   async function submit() {
-    if (planId === "free") return;
-    if (!code && !file) {
-      toast.error("Indique o código da transação ou anexe o comprovativo.");
+    setResult(null);
+    const digits = phone.replace(/\D/g, "");
+    if (digits.length < 9) {
+      toast.error("Introduza o seu número M-Pesa (84 ou 85).");
       return;
     }
     setBusy(true);
+    const toastId = toast.loading("A enviar pedido para o seu telemóvel... confirme com o PIN M-Pesa.");
     try {
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) throw new Error("Sessão expirada");
-      let proofUrl: string | null = null;
-      if (file) {
-        const path = `${u.user.id}/${Date.now()}-${file.name}`;
-        const up = await supabase.storage.from("mpesa-proofs").upload(path, file);
-        if (up.error) throw up.error;
-        proofUrl = supabase.storage.from("mpesa-proofs").getPublicUrl(path).data.publicUrl;
+      const res = await pay({ data: { plan: planId, phone } });
+      setResult({ ok: res.ok, message: res.message });
+      if (res.ok) {
+        toast.success(res.message, { id: toastId });
+        onDone();
+      } else {
+        toast.error(res.message, { id: toastId });
+        onDone();
       }
-      const { data: inserted, error } = await supabase
-        .from("payments")
-        .insert({
-          user_id: u.user.id,
-          plan: planId,
-          amount_mt: amount,
-          method: "mpesa",
-          reference: code || "comprovativo",
-          transaction_code: code || null,
-          proof_url: proofUrl,
-          status: "pendente",
-        } as never)
-        .select()
-        .single();
-      if (error) throw error;
-
-      // Notificar admin por email (não bloqueia)
-      try {
-        await notify({
-          data: {
-            paymentId: (inserted as { id: string }).id,
-            plan: planId,
-            amount,
-            transactionCode: code || null,
-            proofUrl,
-            userEmail: u.user.email ?? "",
-          },
-        });
-      } catch (e) {
-        console.warn("Notify admin failed", e);
-      }
-
-      toast.success("Pedido enviado! Aguarde aprovação (até 24h).");
-      setCode("");
-      setFile(null);
-      onSent();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Erro ao enviar");
+      const msg = e instanceof Error ? e.message : "Erro ao processar o pagamento.";
+      setResult({ ok: false, message: msg });
+      toast.error(msg, { id: toastId });
     } finally {
       setBusy(false);
     }
   }
 
-  const message = encodeURIComponent(
-    `Já efetuei o pagamento via M-Pesa de ${amount} MT (Plano ${planId}). Segue em anexo o comprovativo ou o código da transação${code ? `: ${code}` : ""}. Peço a aprovação do meu pacote.`
-  );
-
   return (
-    <Card className="p-5 space-y-4">
+    <Card className="space-y-4 p-5">
       <div>
-        <p className="font-medium">Como pagar</p>
+        <p className="font-medium">Como funciona</p>
         <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
-          <li>Envie <strong>{amount} MT</strong> via M-Pesa para <strong>+258 84 477 2002</strong> (Way Estudantes).</li>
-          <li>Cole abaixo o código da transação <em>ou</em> anexe a foto do comprovativo.</li>
-          <li>Clique em <strong>Solicitar aprovação</strong>. Será notificado quando os créditos forem activados.</li>
+          <li>Introduza o número M-Pesa (Vodacom) associado à sua conta.</li>
+          <li>Clique em <strong>Pagar {amount} MT</strong>.</li>
+          <li>Receberá um pedido no telemóvel — introduza o seu PIN M-Pesa.</li>
+          <li>Assim que confirmar, o plano e os créditos são activados automaticamente.</li>
         </ol>
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Código da transação M-Pesa</label>
-        <input
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          placeholder="Ex: CGT4K2L9P0"
-          className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-        />
+        <label htmlFor="msisdn" className="text-sm font-medium">
+          Número M-Pesa
+        </label>
+        <div className="flex items-center gap-2">
+          <span className="rounded-md border bg-muted px-3 py-2 text-sm text-muted-foreground">+258</span>
+          <input
+            id="msisdn"
+            inputMode="numeric"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="84 123 4567"
+            className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+          />
+        </div>
+        <p className="text-xs text-muted-foreground">Apenas números Vodacom (84 ou 85).</p>
       </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Ou anexe foto do comprovativo</label>
-        <input
-          type="file"
-          accept="image/*,application/pdf"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-          className="w-full text-sm"
-        />
-      </div>
+      <Button onClick={submit} disabled={busy} className="w-full bg-gradient-hero">
+        {busy ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> A aguardar confirmação...
+          </>
+        ) : (
+          <>
+            <Smartphone className="mr-2 h-4 w-4" /> Pagar {amount} MT
+          </>
+        )}
+      </Button>
 
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <Button onClick={submit} disabled={busy || planId === "free"} className="flex-1 bg-gradient-hero">
-          {busy ? "A enviar..." : "Solicitar aprovação"}
-        </Button>
-        <a
-          href={`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`}
-          target="_blank"
-          rel="noreferrer"
-          className="flex-1"
+      {result && (
+        <div
+          className={`rounded-md border p-3 text-sm ${result.ok ? "border-secondary/50 bg-secondary-soft/40" : "border-destructive/40 bg-destructive/10 text-destructive"}`}
         >
-          <Button variant="outline" className="w-full">
-            <Smartphone className="mr-2 h-4 w-4" /> Falar no WhatsApp
-          </Button>
-        </a>
-      </div>
+          {result.message}
+        </div>
+      )}
 
       <p className="text-xs text-muted-foreground">
-        O administrador é notificado por email assim que submeter o pedido.
+        Pagamento processado pela API oficial do M-Pesa (Vodacom Moçambique). Nunca pedimos o seu PIN.
       </p>
     </Card>
   );

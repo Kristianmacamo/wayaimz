@@ -1,48 +1,62 @@
+/**
+ * Catálogo de planos do Way Estudantes AI.
+ * Fonte única de verdade para preços, duração e permissões.
+ */
+
 export const PLANS = {
   free: {
     id: "free" as const,
     name: "Gratuito",
     price: 0,
-    priceUsd: 0,
+    days: 0,
     period: "",
     credits: 100,
-    features: ["100 créditos para começar", "Chat AI básico"],
-    notIncluded: ["Suporte prioritário", "Download de PDF", "Download de imagens premium"],
+    features: ["100 créditos iniciais", "Chat AI básico"],
+    notIncluded: ["Resolução de exercícios", "Testes", "Exames", "Download de PDF", "Suporte"],
   },
-  basico: {
-    id: "basico" as const,
-    name: "Básico",
+  semanal: {
+    id: "semanal" as const,
+    name: "Semanal",
     price: 65,
-    priceUsd: 1,
-    period: "mês",
-    credits: 500,
-    features: [
-      "500 créditos por mês",
-      "Carregar até 3 fotos por semana",
-      "Tirar fotografias para enviar ao AI",
-      "Resolver exercícios básicos",
-      "Acesso a todas as fórmulas",
-      "Explicações simples passo a passo",
-    ],
-    notIncluded: ["Download de PDF", "Suporte prioritário"],
+    days: 7,
+    period: "semana",
+    credits: 300,
+    features: ["300 créditos", "Chat AI básico", "Explicações passo a passo", "Válido por 7 dias"],
+    notIncluded: ["Resolução de exercícios", "Testes", "Exames", "Download de PDF", "Suporte"],
   },
-  premium: {
-    id: "premium" as const,
-    name: "Premium",
-    price: 299,
-    priceUsd: 5,
-    period: "mês",
-    credits: 2500,
+  semanal_premium: {
+    id: "semanal_premium" as const,
+    name: "Semanal Premium",
+    price: 180,
+    days: 7,
+    period: "semana",
+    credits: 1000,
     features: [
-      "2.500 créditos por mês",
-      "Carregar até 10 fotos",
-      "Resolução avançada de exercícios",
-      "Criação automática de trabalhos (6, 12 e 18 páginas)",
-      "Resumos inteligentes",
-      "Prioridade nas respostas da IA",
-      "Baixar respostas em PDF",
+      "1.000 créditos",
+      "Resolução de exercícios",
+      "Respostas para testes",
+      "Trabalhos académicos",
+      "Download de PDF e Word",
+      "Válido por 7 dias",
+    ],
+    notIncluded: ["Exames completos", "Envio de ficheiros e fotos", "Suporte humano"],
+  },
+  mensal_premium: {
+    id: "mensal_premium" as const,
+    name: "Mensal Premium",
+    price: 300,
+    days: 30,
+    period: "mês",
+    credits: 4000,
+    features: [
+      "4.000 créditos",
+      "Assistente AI avançado",
+      "Resolução de exercícios",
+      "Testes e exames completos",
+      "Trabalhos académicos",
+      "Upload de fotos e ficheiros",
+      "Download de PDF e Word",
       "Suporte prioritário",
-      "Todas as funcionalidades desbloqueadas",
     ],
     notIncluded: [],
   },
@@ -50,12 +64,43 @@ export const PLANS = {
 
 export type PlanId = keyof typeof PLANS;
 
-export type Feature = "chat" | "pdf" | "images" | "priority" | "exercicios" | "testes" | "exames" | "uploads";
+export const PAID_PLAN_IDS = ["semanal", "semanal_premium", "mensal_premium"] as const;
+export type PaidPlanId = (typeof PAID_PLAN_IDS)[number];
+
+export function isPaidPlan(id: string): id is PaidPlanId {
+  return (PAID_PLAN_IDS as readonly string[]).includes(id);
+}
+
+export type Feature =
+  | "chat"
+  | "pdf"
+  | "images"
+  | "priority"
+  | "exercicios"
+  | "testes"
+  | "exames"
+  | "uploads";
 
 export function planAllows(plan: PlanId, feature: Feature) {
-  if (plan === "premium") return true;
-  if (plan === "basico") return feature !== "priority" && feature !== "exames" && feature !== "uploads";
+  if (plan === "mensal_premium") return true;
+  if (plan === "semanal_premium") {
+    return feature === "chat" || feature === "pdf" || feature === "exercicios" || feature === "testes";
+  }
   return feature === "chat";
 }
 
 export const COMMISSION_RATE = 0.1;
+
+/** Mensagens legíveis para os estados de pagamento guardados na base de dados. */
+export const PAYMENT_STATUS_LABEL: Record<string, string> = {
+  pendente: "Pendente",
+  a_processar: "A processar",
+  concluido: "Concluído",
+  falhado: "Falhado",
+};
+
+export const SUBSCRIPTION_STATUS_LABEL: Record<string, string> = {
+  activa: "Activa",
+  expirada: "Expirada",
+  cancelada: "Cancelada",
+};
