@@ -131,12 +131,10 @@ export async function c2bPayment(params: {
   reference: string;
   thirdPartyReference: string;
 }): Promise<MpesaResult> {
-  const cfg = getMpesaConfig();
-  const url = `https://${cfg.host}/ipg/v1x/c2bPayment/singleStage/`;
-
-  // O runtime da aplicação só permite fetch nas portas 80/443. A API do M-Pesa
-  // usa a 18352, por isso o pedido é encaminhado por uma função do backend.
+  // Todo o contacto com o M-Pesa (encriptação RSA da API Key + pedido na porta
+  // 18352) acontece na função de backend `mpesa-proxy`. Nunca no browser.
   const proxyUrl = `${process.env["SUPABASE_URL"]}/functions/v1/mpesa-proxy`;
+  const serviceKey = process.env["SUPABASE_SERVICE_ROLE_KEY"] ?? "";
 
   let httpStatus = 0;
   let text = "";
@@ -145,35 +143,33 @@ export async function c2bPayment(params: {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env["SUPABASE_SERVICE_ROLE_KEY"]}`,
-        apikey: process.env["SUPABASE_SERVICE_ROLE_KEY"] ?? "",
+        Authorization: `Bearer ${serviceKey}`,
+        apikey: serviceKey,
       },
       body: JSON.stringify({
-        url,
-        token: generateBearerToken(cfg),
-        body: {
-          input_TransactionReference: params.reference,
-          input_CustomerMSISDN: params.msisdn,
-          input_Amount: String(params.amount),
-          input_ThirdPartyReference: params.thirdPartyReference,
-          input_ServiceProviderCode: cfg.serviceProviderCode,
-        },
+        action: "c2b",
+        amount: params.amount,
+        msisdn: params.msisdn,
+        reference: params.reference,
+        thirdPartyReference: params.thirdPartyReference,
       }),
     });
     const payload = (await proxyRes.json()) as { status?: number; body?: string; error?: string };
     if (!proxyRes.ok || payload.error) {
-      throw new Error(payload.error ?? `proxy HTTP ${proxyRes.status}`);
+      throw new Error(payload.error ?? `backend HTTP ${proxyRes.status}`);
     }
     httpStatus = payload.status ?? 0;
     text = payload.body ?? "";
   } catch (e) {
+    const detail = e instanceof Error ? e.message : String(e);
+    console.error("[mpesa] c2b falhou:", detail);
     return {
       ok: false,
       code: "NETWORK",
-      message: "Não foi possível contactar o M-Pesa. Verifique a ligação e tente novamente.",
+      message: `Não foi possível contactar o M-Pesa. ${detail}`,
       transactionId: null,
       conversationId: null,
-      raw: { error: e instanceof Error ? e.message : String(e) },
+      raw: { error: detail },
     };
   }
 
