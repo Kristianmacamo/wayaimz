@@ -134,23 +134,38 @@ export async function c2bPayment(params: {
   const cfg = getMpesaConfig();
   const url = `https://${cfg.host}/ipg/v1x/c2bPayment/singleStage/`;
 
-  let response: Response;
+  // O runtime da aplicação só permite fetch nas portas 80/443. A API do M-Pesa
+  // usa a 18352, por isso o pedido é encaminhado por uma função do backend.
+  const proxyUrl = `${process.env["SUPABASE_URL"]}/functions/v1/mpesa-proxy`;
+
+  let httpStatus = 0;
+  let text = "";
   try {
-    response = await fetch(url, {
+    const proxyRes = await fetch(proxyUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Origin: "developer.mpesa.vm.co.mz",
-        Authorization: `Bearer ${generateBearerToken(cfg)}`,
+        Authorization: `Bearer ${process.env["SUPABASE_SERVICE_ROLE_KEY"]}`,
+        apikey: process.env["SUPABASE_SERVICE_ROLE_KEY"] ?? "",
       },
       body: JSON.stringify({
-        input_TransactionReference: params.reference,
-        input_CustomerMSISDN: params.msisdn,
-        input_Amount: String(params.amount),
-        input_ThirdPartyReference: params.thirdPartyReference,
-        input_ServiceProviderCode: cfg.serviceProviderCode,
+        url,
+        token: generateBearerToken(cfg),
+        body: {
+          input_TransactionReference: params.reference,
+          input_CustomerMSISDN: params.msisdn,
+          input_Amount: String(params.amount),
+          input_ThirdPartyReference: params.thirdPartyReference,
+          input_ServiceProviderCode: cfg.serviceProviderCode,
+        },
       }),
     });
+    const payload = (await proxyRes.json()) as { status?: number; body?: string; error?: string };
+    if (!proxyRes.ok || payload.error) {
+      throw new Error(payload.error ?? `proxy HTTP ${proxyRes.status}`);
+    }
+    httpStatus = payload.status ?? 0;
+    text = payload.body ?? "";
   } catch (e) {
     return {
       ok: false,
@@ -162,7 +177,6 @@ export async function c2bPayment(params: {
     };
   }
 
-  const text = await response.text();
   let body: Record<string, unknown> = {};
   try {
     body = JSON.parse(text) as Record<string, unknown>;
@@ -170,7 +184,7 @@ export async function c2bPayment(params: {
     body = { raw: text.slice(0, 2000) };
   }
 
-  const code = String(body["output_ResponseCode"] ?? `HTTP-${response.status}`);
+  const code = String(body["output_ResponseCode"] ?? `HTTP-${httpStatus}`);
   const desc = typeof body["output_ResponseDesc"] === "string" ? (body["output_ResponseDesc"] as string) : undefined;
 
   return {
