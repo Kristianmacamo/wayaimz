@@ -77,18 +77,37 @@ Deno.serve(async (req) => {
     }
     let reachable = false;
     let reachError: string | null = null;
+    let probeStatus: number | null = null;
+    let probeBody: string | null = null;
+    const probeHost = typeof payload["host"] === "string" ? (payload["host"] as string) : cfg.host;
     try {
-      const r = await fetch(`https://${cfg.host}/ipg/v1x/c2bPayment/singleStage/`, {
+      const ref = `DIAG${Date.now().toString().slice(-9)}`;
+      const r = await fetch(`https://${probeHost}/ipg/v1x/c2bPayment/singleStage/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Origin: "developer.mpesa.vm.co.mz" },
-        body: "{}",
+        headers: {
+          "Content-Type": "application/json",
+          Origin: "developer.mpesa.vm.co.mz",
+          Authorization: `Bearer ${bearerToken(cfg.apiKey, cfg.publicKey)}`,
+        },
+        body: JSON.stringify({
+          input_TransactionReference: ref,
+          input_CustomerMSISDN: "258840000000",
+          input_Amount: "1",
+          input_ThirdPartyReference: ref,
+          input_ServiceProviderCode: cfg.serviceProviderCode,
+        }),
       });
       reachable = true;
-      console.log("[mpesa] reachability status", r.status);
+      probeStatus = r.status;
+      probeBody = (await r.text()).slice(0, 500);
+      console.log("[mpesa] probe", probeStatus, probeBody);
     } catch (e) {
       reachError = e instanceof Error ? e.message : String(e);
     }
     return json({
+      probeStatus,
+      probeBody,
+      probeHost,
       env: cfg.env,
       host: cfg.host,
       apiKeyLength: cfg.apiKey.length,
