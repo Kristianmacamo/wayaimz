@@ -107,6 +107,7 @@ Deno.serve(async (req) => {
     return json({
       probeStatus,
       probeBody,
+      probeHost,
       env: cfg.env,
       host: cfg.host,
       apiKeyLength: cfg.apiKey.length,
