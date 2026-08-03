@@ -79,9 +79,10 @@ Deno.serve(async (req) => {
     let reachError: string | null = null;
     let probeStatus: number | null = null;
     let probeBody: string | null = null;
+    const probeHost = typeof payload["host"] === "string" ? (payload["host"] as string) : cfg.host;
     try {
       const ref = `DIAG${Date.now().toString().slice(-9)}`;
-      const r = await fetch(`https://${cfg.host}/ipg/v1x/c2bPayment/singleStage/`, {
+      const r = await fetch(`https://${probeHost}/ipg/v1x/c2bPayment/singleStage/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
