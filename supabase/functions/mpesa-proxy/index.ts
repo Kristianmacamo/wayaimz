@@ -159,22 +159,36 @@ Deno.serve(async (req) => {
     input_ServiceProviderCode: cfg.serviceProviderCode,
   };
 
-  try {
-    const upstream = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Origin: "developer.mpesa.vm.co.mz",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(body),
-    });
-    const text = await upstream.text();
-    console.log("[mpesa] c2b", reference, "status", upstream.status, "body", text.slice(0, 800));
-    return json({ status: upstream.status, body: text });
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    console.error("[mpesa] falha de rede para", url, msg);
-    return json({ error: `Rede: ${msg}` }, 502);
+  let lastStatus = 0;
+  let lastText = "";
+  let lastNetErr = "";
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const upstream = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Origin: "developer.mpesa.vm.co.mz",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+      });
+      const text = await upstream.text();
+      lastStatus = upstream.status;
+      lastText = text;
+      console.log("[mpesa] c2b", reference, "tentativa", attempt, "status", upstream.status, "body", text.slice(0, 800));
+      // 502/503/504 = gateway da Vodacom instável -> repetir
+      if (upstream.status < 502 || upstream.status > 504) {
+        return json({ status: upstream.status, body: text });
+      }
+    } catch (e) {
+      lastNetErr = e instanceof Error ? e.message : String(e);
+      console.error("[mpesa] falha de rede para", url, "tentativa", attempt, lastNetErr);
+    }
+    if (attempt < 3) await new Promise((r) => setTimeout(r, attempt * 1500));
   }
+
+  if (lastStatus) return json({ status: lastStatus, body: lastText });
+  return json({ error: `Rede: ${lastNetErr}` }, 502);
+
 });
