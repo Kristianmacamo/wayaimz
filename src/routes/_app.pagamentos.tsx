@@ -78,7 +78,7 @@ function StripeCard({ planId, amount, planName }: { planId: PaidPlanId; amount: 
 }
 
 function PagamentosPage() {
-  const { plan } = Route.useSearch();
+  const { plan, stripe } = Route.useSearch();
   const qc = useQueryClient();
   const [selectedId, setSelectedId] = useState<PaidPlanId>(plan);
   const selected = PLANS[selectedId];
