@@ -7,6 +7,13 @@ export const startPaymentSchema = z.object({
 });
 export type StartPaymentInput = z.infer<typeof startPaymentSchema>;
 
+export const startStripeSchema = z.object({
+  plan: z.enum(PAID_PLAN_IDS),
+  origin: z.string().url(),
+  email: z.string().email().optional(),
+});
+export type StartStripeInput = z.infer<typeof startStripeSchema>;
+
 export const setCreditsSchema = z.object({
   userId: z.string().uuid(),
   credits: z.number().int().min(0).max(1_000_000),
