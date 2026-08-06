@@ -4,11 +4,11 @@ import { PLANS, PAID_PLAN_IDS, PAYMENT_STATUS_LABEL, isPaidPlan, type PaidPlanId
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Smartphone, CheckCircle2, Loader2, ShieldCheck, XCircle } from "lucide-react";
+import { Smartphone, CheckCircle2, Loader2, ShieldCheck, XCircle, CreditCard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { startMpesaPayment } from "@/lib/payments.functions";
+import { startMpesaPayment, startStripeCheckout } from "@/lib/payments.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/pagamentos")({
