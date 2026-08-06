@@ -159,7 +159,7 @@ function PagamentosPage() {
         Ver detalhes dos planos
       </Link>
 
-      <div className="mt-6">
+      <div className="mt-6 grid gap-4">
         <MpesaForm
           planId={selected.id}
           amount={selected.price}
@@ -169,6 +169,7 @@ function PagamentosPage() {
             qc.invalidateQueries({ queryKey: ["my-profile"] });
           }}
         />
+        <StripeCard planId={selected.id} amount={selected.price} planName={selected.name} />
       </div>
 
       <h2 className="mt-10 font-display text-xl font-bold">Histórico de pagamentos</h2>
