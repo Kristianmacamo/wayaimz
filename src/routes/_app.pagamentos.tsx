@@ -25,8 +25,57 @@ export const Route = createFileRoute("/_app/pagamentos")({
   }),
   validateSearch: (s: Record<string, unknown>) => ({
     plan: (typeof s.plan === "string" && isPaidPlan(s.plan) ? s.plan : "semanal_premium") as PaidPlanId,
+    stripe: (s.stripe === "sucesso" || s.stripe === "cancelado" ? s.stripe : undefined) as
+      | "sucesso"
+      | "cancelado"
+      | undefined,
   }),
 });
+
+function StripeCard({ planId, amount, planName }: { planId: PaidPlanId; amount: number; planName: string }) {
+  const [busy, setBusy] = useState(false);
+  const checkout = useServerFn(startStripeCheckout);
+
+  async function pay() {
+    setBusy(true);
+    try {
+      const res = await checkout({ data: { plan: planId, origin: window.location.origin } });
+      if (res.ok && res.url) {
+        window.location.href = res.url;
+        return;
+      }
+      toast.error(res.message);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro ao abrir o checkout.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Card className="space-y-3 p-5">
+      <div className="flex items-center gap-2">
+        <CreditCard className="h-5 w-5 text-primary" />
+        <p className="font-medium">Cartão bancário (Stripe)</p>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        Pague o plano {planName} com Visa, Mastercard ou carteira digital, num checkout seguro do Stripe. O plano é
+        activado automaticamente após a confirmação.
+      </p>
+      <Button onClick={pay} disabled={busy} variant="outline" className="w-full">
+        {busy ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> A abrir checkout...
+          </>
+        ) : (
+          <>
+            <CreditCard className="mr-2 h-4 w-4" /> Pagar {amount} MT com cartão
+          </>
+        )}
+      </Button>
+    </Card>
+  );
+}
 
 function PagamentosPage() {
   const { plan } = Route.useSearch();
