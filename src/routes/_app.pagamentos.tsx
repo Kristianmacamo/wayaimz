@@ -105,10 +105,24 @@ function PagamentosPage() {
 
   return (
     <div className="mx-auto max-w-3xl p-6 md:p-10">
-      <h1 className="font-display text-3xl font-bold">Pagamento por M-Pesa</h1>
+      <h1 className="font-display text-3xl font-bold">Pagamentos</h1>
       <p className="mt-1 text-muted-foreground">
-        Pagamento automático e seguro. Confirme no seu telemóvel e o plano é activado imediatamente.
+        Escolha o plano e pague por M-Pesa ou cartão bancário. O acesso é activado automaticamente.
       </p>
+
+      {stripe === "sucesso" && (
+        <Card className="mt-6 flex items-center gap-3 border-secondary/40 bg-secondary-soft/40 p-4 text-sm">
+          <CheckCircle2 className="h-5 w-5 text-secondary" />
+          Pagamento por cartão recebido. O plano é activado assim que o Stripe confirmar (poucos segundos).
+        </Card>
+      )}
+      {stripe === "cancelado" && (
+        <Card className="mt-6 flex items-center gap-3 border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+          <XCircle className="h-5 w-5" />
+          Checkout cancelado. Pode tentar novamente quando quiser.
+        </Card>
+      )}
+
 
       {subscription && (
         <Card className="mt-6 flex items-center gap-3 border-secondary/40 bg-secondary-soft/40 p-4">
