@@ -20,9 +20,8 @@ export const Route = createFileRoute("/_app/documento/$id")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  validateSearch: (s: Record<string, unknown>) => ({
-    formato: s.formato === "pdf" || s.formato === "docx" ? (s.formato as "pdf" | "docx") : undefined,
-  }),
+  validateSearch: (s: Record<string, unknown>): { formato?: "pdf" | "docx" } =>
+    s.formato === "pdf" || s.formato === "docx" ? { formato: s.formato } : {},
   component: DocumentoPage,
 });
 

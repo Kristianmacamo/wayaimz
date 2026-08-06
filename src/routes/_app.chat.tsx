@@ -12,7 +12,8 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/chat")({
   component: ChatPage,
-  validateSearch: (s: Record<string, unknown>) => ({ start: typeof s.start === "string" ? s.start : undefined }),
+  validateSearch: (s: Record<string, unknown>): { start?: string } =>
+    typeof s.start === "string" ? { start: s.start } : {},
 });
 
 function ChatPage() {

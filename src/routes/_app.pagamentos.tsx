@@ -4,11 +4,11 @@ import { PLANS, PAID_PLAN_IDS, PAYMENT_STATUS_LABEL, isPaidPlan, type PaidPlanId
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Smartphone, CheckCircle2, Loader2, ShieldCheck, XCircle } from "lucide-react";
+import { Smartphone, CheckCircle2, Loader2, ShieldCheck, XCircle, CreditCard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { startMpesaPayment } from "@/lib/payments.functions";
+import { startMpesaPayment, startStripeCheckout } from "@/lib/payments.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/pagamentos")({
@@ -25,11 +25,60 @@ export const Route = createFileRoute("/_app/pagamentos")({
   }),
   validateSearch: (s: Record<string, unknown>) => ({
     plan: (typeof s.plan === "string" && isPaidPlan(s.plan) ? s.plan : "semanal_premium") as PaidPlanId,
+    stripe: (s.stripe === "sucesso" || s.stripe === "cancelado" ? s.stripe : undefined) as
+      | "sucesso"
+      | "cancelado"
+      | undefined,
   }),
 });
 
+function StripeCard({ planId, amount, planName }: { planId: PaidPlanId; amount: number; planName: string }) {
+  const [busy, setBusy] = useState(false);
+  const checkout = useServerFn(startStripeCheckout);
+
+  async function pay() {
+    setBusy(true);
+    try {
+      const res = await checkout({ data: { plan: planId, origin: window.location.origin } });
+      if (res.ok && res.url) {
+        window.location.href = res.url;
+        return;
+      }
+      toast.error(res.message);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro ao abrir o checkout.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Card className="space-y-3 p-5">
+      <div className="flex items-center gap-2">
+        <CreditCard className="h-5 w-5 text-primary" />
+        <p className="font-medium">Cartão bancário (Stripe)</p>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        Pague o plano {planName} com Visa, Mastercard ou carteira digital, num checkout seguro do Stripe. O plano é
+        activado automaticamente após a confirmação.
+      </p>
+      <Button onClick={pay} disabled={busy} variant="outline" className="w-full">
+        {busy ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> A abrir checkout...
+          </>
+        ) : (
+          <>
+            <CreditCard className="mr-2 h-4 w-4" /> Pagar {amount} MT com cartão
+          </>
+        )}
+      </Button>
+    </Card>
+  );
+}
+
 function PagamentosPage() {
-  const { plan } = Route.useSearch();
+  const { plan, stripe } = Route.useSearch();
   const qc = useQueryClient();
   const [selectedId, setSelectedId] = useState<PaidPlanId>(plan);
   const selected = PLANS[selectedId];
@@ -56,10 +105,24 @@ function PagamentosPage() {
 
   return (
     <div className="mx-auto max-w-3xl p-6 md:p-10">
-      <h1 className="font-display text-3xl font-bold">Pagamento por M-Pesa</h1>
+      <h1 className="font-display text-3xl font-bold">Pagamentos</h1>
       <p className="mt-1 text-muted-foreground">
-        Pagamento automático e seguro. Confirme no seu telemóvel e o plano é activado imediatamente.
+        Escolha o plano e pague por M-Pesa ou cartão bancário. O acesso é activado automaticamente.
       </p>
+
+      {stripe === "sucesso" && (
+        <Card className="mt-6 flex items-center gap-3 border-secondary/40 bg-secondary-soft/40 p-4 text-sm">
+          <CheckCircle2 className="h-5 w-5 text-secondary" />
+          Pagamento por cartão recebido. O plano é activado assim que o Stripe confirmar (poucos segundos).
+        </Card>
+      )}
+      {stripe === "cancelado" && (
+        <Card className="mt-6 flex items-center gap-3 border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+          <XCircle className="h-5 w-5" />
+          Checkout cancelado. Pode tentar novamente quando quiser.
+        </Card>
+      )}
+
 
       {subscription && (
         <Card className="mt-6 flex items-center gap-3 border-secondary/40 bg-secondary-soft/40 p-4">
@@ -96,7 +159,7 @@ function PagamentosPage() {
         Ver detalhes dos planos
       </Link>
 
-      <div className="mt-6">
+      <div className="mt-6 grid gap-4">
         <MpesaForm
           planId={selected.id}
           amount={selected.price}
@@ -106,6 +169,7 @@ function PagamentosPage() {
             qc.invalidateQueries({ queryKey: ["my-profile"] });
           }}
         />
+        <StripeCard planId={selected.id} amount={selected.price} planName={selected.name} />
       </div>
 
       <h2 className="mt-10 font-display text-xl font-bold">Histórico de pagamentos</h2>

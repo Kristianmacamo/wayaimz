@@ -136,7 +136,7 @@ export async function startMpesaPaymentForUser(
   };
 }
 
-async function activatePlan(
+export async function activatePlan(
   userId: string,
   paymentId: string,
   reference: string,

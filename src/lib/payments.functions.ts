@@ -3,9 +3,21 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   setCreditsSchema,
   startPaymentSchema,
+  startStripeSchema,
   type SetCreditsInput,
   type StartPaymentInput,
+  type StartStripeInput,
 } from "./payments.schemas";
+
+/** Cria uma sessão de checkout Stripe e devolve o URL seguro. */
+export const startStripeCheckout = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: StartStripeInput) => startStripeSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const { createStripeCheckoutForUser } = await import("./stripe-payments.server");
+    return createStripeCheckoutForUser(context.userId, data);
+  });
+
 
 /** Inicia um pagamento M-Pesa (C2B) e activa o plano quando confirmado. */
 export const startMpesaPayment = createServerFn({ method: "POST" })
