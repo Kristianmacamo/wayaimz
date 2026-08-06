@@ -29,6 +29,7 @@ import { Route as AppConfiguracoesRouteImport } from './routes/_app.configuracoe
 import { Route as AppChatRouteImport } from './routes/_app.chat'
 import { Route as AppAfiliadosRouteImport } from './routes/_app.afiliados'
 import { Route as AppAdminRouteImport } from './routes/_app.admin'
+import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 import { Route as ApiPublicMpesaCallbackRouteImport } from './routes/api/public/mpesa-callback'
 import { Route as AppFormulasIdRouteImport } from './routes/_app.formulas.$id'
 import { Route as AppDocumentoIdRouteImport } from './routes/_app.documento.$id'
@@ -132,6 +133,11 @@ const AppAdminRoute = AppAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
+  id: '/api/public/stripe-webhook',
+  path: '/api/public/stripe-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicMpesaCallbackRoute = ApiPublicMpesaCallbackRouteImport.update({
   id: '/api/public/mpesa-callback',
   path: '/api/public/mpesa-callback',
@@ -171,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/documento/$id': typeof AppDocumentoIdRoute
   '/formulas/$id': typeof AppFormulasIdRoute
   '/api/public/mpesa-callback': typeof ApiPublicMpesaCallbackRoute
+  '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -195,6 +202,7 @@ export interface FileRoutesByTo {
   '/documento/$id': typeof AppDocumentoIdRoute
   '/formulas/$id': typeof AppFormulasIdRoute
   '/api/public/mpesa-callback': typeof ApiPublicMpesaCallbackRoute
+  '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -221,6 +229,7 @@ export interface FileRoutesById {
   '/_app/documento/$id': typeof AppDocumentoIdRoute
   '/_app/formulas/$id': typeof AppFormulasIdRoute
   '/api/public/mpesa-callback': typeof ApiPublicMpesaCallbackRoute
+  '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -247,6 +256,7 @@ export interface FileRouteTypes {
     | '/documento/$id'
     | '/formulas/$id'
     | '/api/public/mpesa-callback'
+    | '/api/public/stripe-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -271,6 +281,7 @@ export interface FileRouteTypes {
     | '/documento/$id'
     | '/formulas/$id'
     | '/api/public/mpesa-callback'
+    | '/api/public/stripe-webhook'
   id:
     | '__root__'
     | '/'
@@ -296,6 +307,7 @@ export interface FileRouteTypes {
     | '/_app/documento/$id'
     | '/_app/formulas/$id'
     | '/api/public/mpesa-callback'
+    | '/api/public/stripe-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -304,6 +316,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiPublicMpesaCallbackRoute: typeof ApiPublicMpesaCallbackRoute
+  ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -448,6 +461,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
+    '/api/public/stripe-webhook': {
+      id: '/api/public/stripe-webhook'
+      path: '/api/public/stripe-webhook'
+      fullPath: '/api/public/stripe-webhook'
+      preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/mpesa-callback': {
       id: '/api/public/mpesa-callback'
       path: '/api/public/mpesa-callback'
@@ -532,6 +552,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ApiChatRoute: ApiChatRoute,
   ApiPublicMpesaCallbackRoute: ApiPublicMpesaCallbackRoute,
+  ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
