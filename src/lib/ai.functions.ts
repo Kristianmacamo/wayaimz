@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 import { generateText } from "ai";
+import { planAllows, type PlanId } from "@/lib/plans";
+
 
 const MODEL = "google/gemini-3.6-flash";
 
@@ -79,7 +81,23 @@ export const generateWork = createServerFn({ method: "POST" })
   .inputValidator((data: { tema: string; curso: string; descricao: string; pages: number }) => data)
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+
+    // Trabalhos académicos exigem um plano pago activo.
+    const { data: prof } = await supabase
+      .from("profiles")
+      .select("current_plan, plan_expires_at")
+      .eq("id", userId)
+      .maybeSingle();
+    const plan = (prof?.current_plan ?? "free") as PlanId;
+    const activo = plan !== "free" && (!prof?.plan_expires_at || new Date(prof.plan_expires_at) > new Date());
+    if (!activo || !planAllows(plan, "trabalhos")) {
+      throw new Error(
+        "PLANO_NECESSARIO: Os Trabalhos Académicos exigem o plano Semanal Premium (180 MT) ou Mensal Premium (300 MT).",
+      );
+    }
+
     await spendCredits(supabase, userId, 5);
+
 
     const SECTIONS = [
       "Capa",

@@ -79,15 +79,26 @@ export type Feature =
   | "exercicios"
   | "testes"
   | "exames"
+  | "trabalhos"
   | "uploads";
 
 export function planAllows(plan: PlanId, feature: Feature) {
   if (plan === "mensal_premium") return true;
   if (plan === "semanal_premium") {
-    return feature === "chat" || feature === "pdf" || feature === "exercicios" || feature === "testes";
+    return (
+      feature === "chat" ||
+      feature === "pdf" ||
+      feature === "exercicios" ||
+      feature === "testes" ||
+      feature === "trabalhos"
+    );
   }
   return feature === "chat";
 }
+
+/** Planos que dão acesso aos Trabalhos Académicos. */
+export const WORK_PLAN_IDS = ["semanal_premium", "mensal_premium"] as const;
+
 
 export const COMMISSION_RATE = 0.1;
 

@@ -5,8 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { RichText } from "@/components/RichText";
-import { exportPdf, exportWord, type DocSection } from "@/lib/export-doc";
-import { ArrowLeft, Download, Eye, Loader2, Pencil, Save } from "lucide-react";
+import { exportHtml, exportPdf, exportWord, type DocSection } from "@/lib/export-doc";
+import { ArrowLeft, Code2, Download, Eye, Loader2, Pencil, Save } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/documento/$id")({
@@ -31,18 +31,21 @@ function DocumentoPage() {
   const [sections, setSections] = useState<DocSection[]>([]);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [exporting, setExporting] = useState<"pdf" | "docx" | null>(null);
+  const [exporting, setExporting] = useState<"pdf" | "docx" | "html" | null>(null);
 
-  async function handleExport(kind: "pdf" | "docx") {
+  async function handleExport(kind: "pdf" | "docx" | "html") {
     if (!doc) return;
     if (!sections.length) {
       toast.error("Documento vazio", { description: "Gere novamente o trabalho antes de exportar." });
       return;
     }
     setExporting(kind);
-    const id = toast.loading(kind === "pdf" ? "A preparar o PDF..." : "A preparar o ficheiro Word...");
+    const id = toast.loading(
+      kind === "pdf" ? "A preparar o PDF..." : kind === "html" ? "A preparar o ficheiro HTML..." : "A preparar o ficheiro Word...",
+    );
     try {
       if (kind === "pdf") await exportPdf(doc.tema, sections);
+      else if (kind === "html") exportHtml(doc.tema, sections);
       else await exportWord(doc.tema, sections);
       toast.success("Transferência iniciada.", { id });
     } catch (e) {
@@ -130,6 +133,9 @@ function DocumentoPage() {
           className={formato === "pdf" ? "bg-gradient-hero" : ""}
         >
           {exporting === "pdf" ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Download className="mr-1.5 h-4 w-4" />} PDF
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => handleExport("html")} disabled={exporting !== null}>
+          {exporting === "html" ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Code2 className="mr-1.5 h-4 w-4" />} HTML/CSS
         </Button>
 
       </div>

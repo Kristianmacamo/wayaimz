@@ -23,12 +23,9 @@ export const Route = createFileRoute("/_app/pagamentos")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  validateSearch: (s: Record<string, unknown>) => ({
+  validateSearch: (s: Record<string, unknown>): { plan: PaidPlanId; stripe?: "sucesso" | "cancelado" } => ({
     plan: (typeof s.plan === "string" && isPaidPlan(s.plan) ? s.plan : "semanal_premium") as PaidPlanId,
-    stripe: (s.stripe === "sucesso" || s.stripe === "cancelado" ? s.stripe : undefined) as
-      | "sucesso"
-      | "cancelado"
-      | undefined,
+    ...(s.stripe === "sucesso" || s.stripe === "cancelado" ? { stripe: s.stripe as "sucesso" | "cancelado" } : {}),
   }),
 });
 
