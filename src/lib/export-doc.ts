@@ -101,3 +101,66 @@ export async function exportWord(title: string, sections: DocSection[]) {
     throw new Error("O navegador bloqueou a transferência do ficheiro Word. Permita downloads e tente novamente.");
   }
 }
+
+/** Escapa texto para HTML. */
+function esc(s: string) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+/**
+ * Exporta para um ficheiro .html independente (HTML + CSS embutido),
+ * pronto a abrir e editar no VS Code ou no navegador.
+ */
+export function exportHtml(title: string, sections: DocSection[]) {
+  if (!sections.length) throw new Error("O documento ainda não tem conteúdo para exportar.");
+
+  const body = sections
+    .map((section) => {
+      const clean = sanitizeMath(section.body).replace(/^#+\s*/gm, "").replace(/\*\*/g, "").replace(/`/g, "");
+      const paragraphs = clean
+        .split("\n")
+        .filter((p) => p.trim())
+        .map((p) => `      <p>${esc(p)}</p>`)
+        .join("\n");
+      return `    <section>\n      <h2>${esc(section.title)}</h2>\n${paragraphs}\n    </section>`;
+    })
+    .join("\n");
+
+  const html = `<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${esc(title)}</title>
+  <style>
+    :root { --ink: #16202c; --muted: #5b6b7c; --line: #dde5ee; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 48px 20px; background: #f4f7fb; color: var(--ink);
+      font-family: Georgia, "Times New Roman", serif; line-height: 1.7;
+    }
+    main { max-width: 820px; margin: 0 auto; background: #fff; padding: 56px 64px;
+      border: 1px solid var(--line); border-radius: 10px; }
+    h1 { font-size: 2rem; text-align: center; margin: 0 0 8px; }
+    .meta { text-align: center; color: var(--muted); font-size: .9rem; margin-bottom: 40px; }
+    h2 { font-size: 1.25rem; margin: 36px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+    p { margin: 0 0 12px; text-align: justify; }
+    @media print { body { background: #fff; padding: 0; } main { border: 0; padding: 0; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>${esc(title)}</h1>
+    <p class="meta">Way Estudantes AI</p>
+${body}
+  </main>
+</body>
+</html>
+`;
+
+  try {
+    saveAs(new Blob([html], { type: "text/html;charset=utf-8" }), `${title.slice(0, 60) || "documento"}.html`);
+  } catch {
+    throw new Error("O navegador bloqueou a transferência do ficheiro HTML. Permita downloads e tente novamente.");
+  }
+}
