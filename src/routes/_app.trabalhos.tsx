@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { BookOpen, FileText, Loader2, Sparkles } from "lucide-react";
+import { BookOpen, FileText, Loader2, Lock, Sparkles } from "lucide-react";
+import { planAllows, type PlanId } from "@/lib/plans";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/trabalhos")({
@@ -32,6 +33,8 @@ const MINUTES_TO_PAGES: Record<number, number> = { 1: 9, 2: 12, 3: 15, 4: 18, 5:
 /** Traduz erros técnicos em mensagens claras com o próximo passo. */
 function friendlyError(e: unknown) {
   const msg = e instanceof Error ? e.message : String(e ?? "");
+  if (/PLANO_NECESSARIO/i.test(msg))
+    return "Os Trabalhos Académicos exigem um plano Premium activo. Vá a Pagamentos para activar.";
   if (/cr[ée]dito/i.test(msg)) return "Ficou sem créditos. Vá a Planos e ative um plano para continuar.";
   if (/suspens/i.test(msg)) return "A sua conta está suspensa. Contacte o suporte pelo WhatsApp +258 84 477 2002.";
   if (/unauthorized|401|sess/i.test(msg)) return "A sessão expirou. Saia e volte a entrar na sua conta.";
@@ -61,6 +64,16 @@ function TrabalhosPage() {
       return data ?? [];
     },
   });
+
+  const { data: profile } = useQuery({
+    queryKey: ["my-profile-plan"],
+    queryFn: async () =>
+      (await supabase.from("profiles").select("current_plan, plan_expires_at").maybeSingle()).data,
+  });
+  const plano = (profile?.current_plan ?? "free") as PlanId;
+  const planoActivo =
+    plano !== "free" && (!profile?.plan_expires_at || new Date(profile.plan_expires_at) > new Date());
+  const podeGerar = planoActivo && planAllows(plano, "trabalhos");
 
   const [elapsed, setElapsed] = useState(0);
 
@@ -99,9 +112,33 @@ function TrabalhosPage() {
         </div>
       </div>
 
+      {!podeGerar && (
+        <div className="mb-6 rounded-2xl border border-primary/30 bg-primary/5 p-5 shadow-soft">
+          <div className="flex items-start gap-3">
+            <Lock className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+            <div className="min-w-0">
+              <p className="font-semibold">Funcionalidade paga</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                A geração de Trabalhos Académicos está incluída no plano <strong>Semanal Premium (180 MT)</strong> e no
+                plano <strong>Mensal Premium (300 MT)</strong>. Depois de pagar, gera trabalhos completos e descarrega
+                em Word, PDF ou HTML/CSS.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button asChild className="bg-gradient-hero">
+                  <Link to="/pagamentos" search={{ plan: "semanal_premium" }}>Pagar plano</Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/planos">Ver planos</Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button className="bg-gradient-hero">
+          <Button className="bg-gradient-hero" disabled={!podeGerar}>
             <Sparkles className="mr-1.5 h-4 w-4" /> Gerar Trabalho
           </Button>
         </DialogTrigger>
