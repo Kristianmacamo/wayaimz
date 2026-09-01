@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 import { generateText } from "ai";
+import { planAllows, type PlanId } from "@/lib/plans";
+
 
 const MODEL = "google/gemini-3.6-flash";
 
