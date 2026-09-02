@@ -83,10 +83,13 @@ export async function startMpesaPaymentForUser(
   });
 
   if (!result.ok) {
+    // INS-9 = a Vodacom esgotou o tempo de espera, mas o pedido pode ainda
+    // estar no telemóvel do cliente. Mantemos como "a_processar".
+    const pending = result.code === "INS-9";
     await supabaseAdmin
       .from("payments")
       .update({
-        status: "falhado",
+        status: pending ? "a_processar" : "falhado",
         error_message: `${result.code}: ${result.message}`,
         transaction_id: result.transactionId,
         conversation_id: result.conversationId,
@@ -95,8 +98,19 @@ export async function startMpesaPaymentForUser(
       })
       .eq("id", payment.id);
 
-    return { ok: false, message: result.message, paymentId: payment.id, reference, plan: input.plan, expiresAt: null, credits: null };
+    return {
+      ok: false,
+      message: pending
+        ? "Enviámos o pedido para o seu telemóvel. Confirme com o seu PIN M-Pesa; o plano é activado assim que a Vodacom confirmar."
+        : result.message,
+      paymentId: payment.id,
+      reference,
+      plan: input.plan,
+      expiresAt: null,
+      credits: null,
+    };
   }
+
 
   await supabaseAdmin
     .from("payments")
