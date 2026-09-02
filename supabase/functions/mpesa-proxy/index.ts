@@ -151,19 +151,23 @@ Deno.serve(async (req) => {
   }
 
   const url = `https://${cfg.host}/ipg/v1x/c2bPayment/singleStage/`;
-  const body = {
-    input_TransactionReference: reference,
-    input_CustomerMSISDN: msisdn,
-    input_Amount: String(amount),
-    input_ThirdPartyReference: thirdPartyReference,
-    input_ServiceProviderCode: cfg.serviceProviderCode,
-  };
 
   let lastStatus = 0;
   let lastText = "";
   let lastNetErr = "";
   for (let attempt = 1; attempt <= 3; attempt++) {
+    // Referência nova por tentativa -> evita INS-10 (Duplicate Transaction).
+    const attemptRef = attempt === 1 ? reference : `${reference}${attempt}`.slice(-20);
+    const body = {
+      input_TransactionReference: attemptRef,
+      input_CustomerMSISDN: msisdn,
+      input_Amount: String(amount),
+      input_ThirdPartyReference: attempt === 1 ? thirdPartyReference : attemptRef,
+      input_ServiceProviderCode: cfg.serviceProviderCode,
+    };
     try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 100_000);
       const upstream = await fetch(url, {
         method: "POST",
         headers: {
@@ -172,15 +176,22 @@ Deno.serve(async (req) => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(body),
+        signal: controller.signal,
       });
+      clearTimeout(timer);
       const text = await upstream.text();
       lastStatus = upstream.status;
       lastText = text;
-      console.log("[mpesa] c2b", reference, "tentativa", attempt, "status", upstream.status, "body", text.slice(0, 800));
-      // 502/503/504 = gateway da Vodacom instável -> repetir
-      if (upstream.status < 502 || upstream.status > 504) {
-        return json({ status: upstream.status, body: text });
-      }
+      console.log("[mpesa] c2b", attemptRef, "tentativa", attempt, "status", upstream.status, "body", text.slice(0, 800));
+
+      let code = "";
+      try {
+        code = String((JSON.parse(text) as Record<string, unknown>)["output_ResponseCode"] ?? "");
+      } catch { /* corpo não-JSON */ }
+
+      // INS-10 (duplicada) -> repetir com referência nova.
+      const retryable = (upstream.status >= 502 && upstream.status <= 504) || code === "INS-10";
+      if (!retryable) return json({ status: upstream.status, body: text });
     } catch (e) {
       lastNetErr = e instanceof Error ? e.message : String(e);
       console.error("[mpesa] falha de rede para", url, "tentativa", attempt, lastNetErr);
@@ -190,5 +201,6 @@ Deno.serve(async (req) => {
 
   if (lastStatus) return json({ status: lastStatus, body: lastText });
   return json({ error: `Rede: ${lastNetErr}` }, 502);
+
 
 });
