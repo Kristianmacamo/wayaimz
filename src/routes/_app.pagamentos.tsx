@@ -243,6 +243,10 @@ function MpesaForm({ planId, amount, onDone }: { planId: PaidPlanId; amount: num
           <li>Receberá um pedido no telemóvel — introduza o seu PIN M-Pesa.</li>
           <li>Assim que confirmar, o plano e os créditos são activados automaticamente.</li>
         </ol>
+        <p className="mt-3 rounded-md border bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
+          Os pagamentos são recebidos na conta M-Pesa oficial do WAY Estudantes AI:{" "}
+          <strong className="text-foreground">84 477 2002</strong>
+        </p>
       </div>
 
       <div className="space-y-2">
