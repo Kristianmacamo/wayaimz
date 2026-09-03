@@ -62,7 +62,12 @@ Deno.serve(async (req) => {
 
   const cfg = config();
   const auth = req.headers.get("Authorization") ?? "";
-  const isService = auth === `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`;
+  const proxySecret = Deno.env.get("MPESA_PROXY_SECRET") ?? "";
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  const internalHeader = req.headers.get("x-mpesa-proxy-secret") ?? "";
+  const isService =
+    (proxySecret.length > 0 && internalHeader === proxySecret) ||
+    (serviceKey.length > 0 && auth === `Bearer ${serviceKey}`);
 
   // --- Diagnóstico (não devolve segredos, apenas metadados) ---
   if (payload["action"] === "diagnose") {

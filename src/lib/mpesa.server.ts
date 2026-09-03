@@ -135,6 +135,7 @@ export async function c2bPayment(params: {
   // 18352) acontece na função de backend `mpesa-proxy`. Nunca no browser.
   const proxyUrl = `${process.env["SUPABASE_URL"]}/functions/v1/mpesa-proxy`;
   const serviceKey = process.env["SUPABASE_SERVICE_ROLE_KEY"] ?? "";
+  const proxySecret = process.env["MPESA_PROXY_SECRET"] ?? "";
 
   let httpStatus = 0;
   let text = "";
@@ -145,6 +146,7 @@ export async function c2bPayment(params: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${serviceKey}`,
         apikey: serviceKey,
+        "x-mpesa-proxy-secret": proxySecret,
       },
       body: JSON.stringify({
         action: "c2b",
