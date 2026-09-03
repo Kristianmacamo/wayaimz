@@ -10,8 +10,8 @@ export const PLANS = {
     price: 0,
     days: 0,
     period: "",
-    credits: 100,
-    features: ["100 créditos iniciais", "Chat AI básico"],
+    credits: 10,
+    features: ["10 créditos iniciais", "Chat AI básico"],
     notIncluded: ["Resolução de exercícios", "Testes", "Exames", "Download de PDF", "Suporte"],
   },
   semanal: {
