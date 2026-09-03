@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { GraduationCap, MessageSquare, BookOpen, Beaker, ClipboardCheck, FileText, CreditCard, Users, User as UserIcon, LifeBuoy, LogOut, Menu, X, Shield, Wallet, Home, Calculator, Sigma, Lightbulb, Settings } from "lucide-react";
 import { AppTabBar } from "@/components/AppTabBar";
-import { QuickActionsFab } from "@/components/QuickActionsFab";
+
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 
@@ -137,7 +137,7 @@ function AppLayout() {
       </div>
 
       <AppTabBar />
-      <QuickActionsFab />
+      
       {open && <div className="fixed inset-0 z-30 bg-black/40 md:hidden" onClick={() => setOpen(false)} />}
     </div>
   );
