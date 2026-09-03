@@ -146,6 +146,7 @@ export async function c2bPayment(params: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${serviceKey}`,
         apikey: serviceKey,
+        "x-mpesa-proxy-secret": proxySecret,
       },
       body: JSON.stringify({
         action: "c2b",
