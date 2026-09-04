@@ -125,6 +125,28 @@ export async function startMpesaPaymentForUser(
 
   const activation = await activatePlan(userId, payment.id, reference, input.plan, profile.credits ?? 0);
 
+  // Notificar o administrador — não bloqueia a activação.
+  try {
+    const { data: userProfile } = await supabaseAdmin
+      .from("profiles")
+      .select("email")
+      .eq("id", userId)
+      .maybeSingle();
+    const { sendAdminPaymentEmail } = await import("./notify.server");
+    await sendAdminPaymentEmail({
+      paymentId: payment.id,
+      plan: input.plan,
+      amount: plan.price,
+      userEmail: userProfile?.email ?? "",
+      phone: msisdn,
+      transactionId: result.transactionId,
+      reference,
+      status: "concluido",
+    });
+  } catch (e) {
+    console.warn("admin notify failed", e);
+  }
+
   // Comissão de afiliado (10%) — não bloqueia a activação.
   if (profile.referred_by) {
     try {
@@ -138,6 +160,7 @@ export async function startMpesaPaymentForUser(
       console.warn("commission insert failed", e);
     }
   }
+
 
   return {
     ok: true,
