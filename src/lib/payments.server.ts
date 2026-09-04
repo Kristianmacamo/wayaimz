@@ -3,7 +3,7 @@
  */
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { PLANS, COMMISSION_RATE, type PaidPlanId } from "./plans";
-import { c2bPayment, generateReference, isMpesaMsisdn, normalizeMsisdn } from "./mpesa.server";
+import { c2bPayment, generateReference, isMpesaLive, isMpesaMsisdn, normalizeMsisdn } from "./mpesa.server";
 
 export type StartPaymentResult = {
   ok: boolean;
