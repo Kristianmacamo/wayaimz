@@ -73,13 +73,15 @@ export const Route = createFileRoute("/api/public/mpesa-callback")({
           if (success) {
             // Activação automática do plano + notificação ao admin.
             const { isPaidPlan } = await import("@/lib/plans");
+            const { isMpesaLive } = await import("@/lib/mpesa.server");
             const { data: profile } = await supabaseAdmin
               .from("profiles")
               .select("credits, email")
               .eq("id", payment.user_id)
               .maybeSingle();
 
-            if (isPaidPlan(payment.plan)) {
+            // Em modo de teste (sandbox) não há dinheiro real: nada é activado.
+            if (isMpesaLive() && isPaidPlan(payment.plan)) {
               const { activatePlan } = await import("@/lib/payments.server");
               await activatePlan(
                 payment.user_id,
@@ -89,6 +91,7 @@ export const Route = createFileRoute("/api/public/mpesa-callback")({
                 profile?.credits ?? 0
               );
             }
+
 
             const { sendAdminPaymentEmail } = await import("@/lib/notify.server");
             await sendAdminPaymentEmail({

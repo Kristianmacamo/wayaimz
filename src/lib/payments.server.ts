@@ -3,7 +3,7 @@
  */
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { PLANS, COMMISSION_RATE, type PaidPlanId } from "./plans";
-import { c2bPayment, generateReference, isMpesaMsisdn, normalizeMsisdn } from "./mpesa.server";
+import { c2bPayment, generateReference, isMpesaLive, isMpesaMsisdn, normalizeMsisdn } from "./mpesa.server";
 
 export type StartPaymentResult = {
   ok: boolean;
@@ -111,6 +111,7 @@ export async function startMpesaPaymentForUser(
     };
   }
 
+  const live = isMpesaLive();
 
   await supabaseAdmin
     .from("payments")
@@ -118,10 +119,25 @@ export async function startMpesaPaymentForUser(
       status: "concluido",
       transaction_id: result.transactionId,
       conversation_id: result.conversationId,
+      error_message: live ? null : "TESTE (sandbox): sem dinheiro real, plano não activado.",
       api_response: result.raw as never,
       updated_at: new Date().toISOString(),
     })
     .eq("id", payment.id);
+
+  // Em modo de teste (sandbox) o dinheiro não é real — não activar plano nem créditos.
+  if (!live) {
+    return {
+      ok: false,
+      message:
+        "Pagamento de TESTE concluído (modo sandbox). Nenhum dinheiro real foi recebido, por isso o plano e os créditos não foram activados.",
+      paymentId: payment.id,
+      reference,
+      plan: input.plan,
+      expiresAt: null,
+      credits: null,
+    };
+  }
 
   const activation = await activatePlan(userId, payment.id, reference, input.plan, profile.credits ?? 0);
 
@@ -171,6 +187,7 @@ export async function startMpesaPaymentForUser(
     expiresAt: activation.expiresAt,
     credits: activation.credits,
   };
+
 }
 
 export async function activatePlan(
