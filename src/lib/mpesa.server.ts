@@ -69,6 +69,12 @@ export function isMpesaMsisdn(msisdn: string) {
   return /^258(84|85)\d{7}$/.test(msisdn);
 }
 
+/** true apenas quando estamos ligados ao M-Pesa real (dinheiro verdadeiro). */
+export function isMpesaLive() {
+  return (process.env["MPESA_ENV"] ?? "live").toLowerCase() !== "sandbox";
+}
+
+
 export function generateReference() {
   return `WAY${randomUUID().replace(/-/g, "").slice(0, 12).toUpperCase()}`;
 }
