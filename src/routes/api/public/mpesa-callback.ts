@@ -48,7 +48,7 @@ export const Route = createFileRoute("/api/public/mpesa-callback")({
 
         const { data: payment } = await supabaseAdmin
           .from("payments")
-          .select("id, status")
+          .select("id, status, user_id, plan, amount, phone_number")
           .eq("payment_reference", reference)
           .maybeSingle();
 
@@ -56,20 +56,56 @@ export const Route = createFileRoute("/api/public/mpesa-callback")({
 
         // Não reabrir pagamentos já concluídos pelo fluxo síncrono.
         if (payment.status !== "concluido") {
+          const success = code === "INS-0";
           await supabaseAdmin
             .from("payments")
             .update({
-              status: code === "INS-0" ? "concluido" : "falhado",
+              status: success ? "concluido" : "falhado",
               transaction_id: transactionId,
-              error_message:
-                code === "INS-0" ? null : `${code}: ${d.output_ResponseDesc ?? d.input_ResponseDesc ?? ""}`,
+              error_message: success
+                ? null
+                : `${code}: ${d.output_ResponseDesc ?? d.input_ResponseDesc ?? ""}`,
               api_response: parsed.data as never,
               updated_at: new Date().toISOString(),
             })
             .eq("id", payment.id);
+
+          if (success) {
+            // Activação automática do plano + notificação ao admin.
+            const { isPaidPlan } = await import("@/lib/plans");
+            const { data: profile } = await supabaseAdmin
+              .from("profiles")
+              .select("credits, email")
+              .eq("id", payment.user_id)
+              .maybeSingle();
+
+            if (isPaidPlan(payment.plan)) {
+              const { activatePlan } = await import("@/lib/payments.server");
+              await activatePlan(
+                payment.user_id,
+                payment.id,
+                reference,
+                payment.plan,
+                profile?.credits ?? 0
+              );
+            }
+
+            const { sendAdminPaymentEmail } = await import("@/lib/notify.server");
+            await sendAdminPaymentEmail({
+              paymentId: payment.id,
+              plan: payment.plan,
+              amount: Number(payment.amount),
+              userEmail: profile?.email ?? "",
+              phone: payment.phone_number ?? null,
+              transactionId,
+              reference,
+              status: "concluido",
+            });
+          }
         }
 
         return json({ output_ResponseCode: "INS-0", output_ResponseDesc: "Received" });
+
       },
     },
   },
