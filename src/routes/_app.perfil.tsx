@@ -8,6 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { Link } from "@tanstack/react-router";
+import { PLANS, type PlanId } from "@/lib/plans";
+import { Coins, Crown } from "lucide-react";
 
 export const Route = createFileRoute("/_app/perfil")({ component: PerfilPage });
 
@@ -54,6 +57,45 @@ function PerfilPage() {
   return (
     <div className="mx-auto max-w-2xl p-6 md:p-10">
       <h1 className="font-display text-3xl font-bold">Meu Perfil</h1>
+
+      {/* Saldo de créditos e plano actual */}
+      <Card className="mt-6 p-5">
+        {(() => {
+          const planId = (profile.current_plan in PLANS ? profile.current_plan : "free") as PlanId;
+          const plan = PLANS[planId];
+          const expires = profile.plan_expires_at ? new Date(profile.plan_expires_at) : null;
+          return (
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary-soft text-primary">
+                  <Coins className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Saldo de créditos</p>
+                  <p className="font-display text-2xl font-bold">{profile.credits ?? 0}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary-soft text-primary">
+                  <Crown className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Plano actual</p>
+                  <p className="font-display text-2xl font-bold">{plan.name}</p>
+                  {expires && (
+                    <p className="text-xs text-muted-foreground">
+                      Válido até {expires.toLocaleDateString("pt-MZ")}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <Link to="/planos">
+                <Button variant="outline" className="shrink-0">Ver planos</Button>
+              </Link>
+            </div>
+          );
+        })()}
+      </Card>
 
       <Card className="mt-6 p-5">
         <div className="flex items-center gap-4">
