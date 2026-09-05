@@ -158,6 +158,12 @@ function AdminPage() {
                   <p className="text-xs text-muted-foreground">
                     {u ? `${u.nome} ${u.apelido} (${u.email})` : p.user_id}
                   </p>
+                  {u && (
+                    <p className="text-xs">
+                      Saldo actual: <strong>{u.credits ?? 0} créditos</strong> · Plano:{" "}
+                      <span className="font-medium text-primary">{planName(u.current_plan)}</span>
+                    </p>
+                  )}
                   <p className="text-xs text-muted-foreground">
                     M-Pesa {p.phone_number} · Ref: {p.payment_reference} ·{" "}
                     {new Date(p.created_at).toLocaleString("pt-PT")}
