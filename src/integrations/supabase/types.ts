@@ -183,6 +183,191 @@ export type Database = {
           },
         ]
       }
+      mk_payouts: {
+        Row: {
+          amount_mt: number
+          author_id: string
+          created_at: string
+          id: string
+          numero_telefone: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_mt: number
+          author_id: string
+          created_at?: string
+          id?: string
+          numero_telefone?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_mt?: number
+          author_id?: string
+          created_at?: string
+          id?: string
+          numero_telefone?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mk_payouts_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mk_products: {
+        Row: {
+          author_id: string | null
+          author_name: string
+          created_at: string
+          descricao: string
+          disciplina: string
+          ficheiro_url: string | null
+          id: string
+          nivel_ensino: Database["public"]["Enums"]["mk_level"]
+          paginas: number
+          preco_base: number
+          rejeicao_motivo: string | null
+          status: Database["public"]["Enums"]["mk_status"]
+          tipo: Database["public"]["Enums"]["mk_type"]
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string | null
+          author_name?: string
+          created_at?: string
+          descricao?: string
+          disciplina: string
+          ficheiro_url?: string | null
+          id?: string
+          nivel_ensino: Database["public"]["Enums"]["mk_level"]
+          paginas?: number
+          preco_base: number
+          rejeicao_motivo?: string | null
+          status?: Database["public"]["Enums"]["mk_status"]
+          tipo: Database["public"]["Enums"]["mk_type"]
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string | null
+          author_name?: string
+          created_at?: string
+          descricao?: string
+          disciplina?: string
+          ficheiro_url?: string | null
+          id?: string
+          nivel_ensino?: Database["public"]["Enums"]["mk_level"]
+          paginas?: number
+          preco_base?: number
+          rejeicao_motivo?: string | null
+          status?: Database["public"]["Enums"]["mk_status"]
+          tipo?: Database["public"]["Enums"]["mk_type"]
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mk_products_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mk_sales: {
+        Row: {
+          author_id: string | null
+          buyer_id: string | null
+          buyer_name: string
+          comissao_plataforma: number
+          created_at: string
+          erro_mensagem: string | null
+          id: string
+          metodo_pagamento: string
+          mpesa_transaction_id: string | null
+          numero_telefone: string | null
+          preco_base: number
+          product_id: string
+          referencia_mpesa: string | null
+          status_pagamento: Database["public"]["Enums"]["mk_pay_status"]
+          updated_at: string
+          valor_com_iva: number
+          valor_iva: number
+          valor_liquido_autor: number
+        }
+        Insert: {
+          author_id?: string | null
+          buyer_id?: string | null
+          buyer_name?: string
+          comissao_plataforma: number
+          created_at?: string
+          erro_mensagem?: string | null
+          id?: string
+          metodo_pagamento?: string
+          mpesa_transaction_id?: string | null
+          numero_telefone?: string | null
+          preco_base: number
+          product_id: string
+          referencia_mpesa?: string | null
+          status_pagamento?: Database["public"]["Enums"]["mk_pay_status"]
+          updated_at?: string
+          valor_com_iva: number
+          valor_iva: number
+          valor_liquido_autor: number
+        }
+        Update: {
+          author_id?: string | null
+          buyer_id?: string | null
+          buyer_name?: string
+          comissao_plataforma?: number
+          created_at?: string
+          erro_mensagem?: string | null
+          id?: string
+          metodo_pagamento?: string
+          mpesa_transaction_id?: string | null
+          numero_telefone?: string | null
+          preco_base?: number
+          product_id?: string
+          referencia_mpesa?: string | null
+          status_pagamento?: Database["public"]["Enums"]["mk_pay_status"]
+          updated_at?: string
+          valor_com_iva?: number
+          valor_iva?: number
+          valor_liquido_autor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mk_sales_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mk_sales_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mk_sales_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "mk_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount: number
@@ -434,6 +619,10 @@ export type Database = {
       app_role: "admin" | "user"
       education_level: "secundario" | "superior"
       message_role: "user" | "assistant"
+      mk_level: "secundario" | "universidade" | "instituto"
+      mk_pay_status: "pendente" | "a_processar" | "confirmado" | "falhado"
+      mk_status: "pendente" | "aprovado" | "rejeitado"
+      mk_type: "ebook" | "modulo_exame" | "teste"
       payment_method: "mpesa" | "paypal" | "stripe"
       payment_status: "pendente" | "aprovado" | "rejeitado"
       plan_tier: "free" | "basico" | "premium" | "completo"
@@ -567,6 +756,10 @@ export const Constants = {
       app_role: ["admin", "user"],
       education_level: ["secundario", "superior"],
       message_role: ["user", "assistant"],
+      mk_level: ["secundario", "universidade", "instituto"],
+      mk_pay_status: ["pendente", "a_processar", "confirmado", "falhado"],
+      mk_status: ["pendente", "aprovado", "rejeitado"],
+      mk_type: ["ebook", "modulo_exame", "teste"],
       payment_method: ["mpesa", "paypal", "stripe"],
       payment_status: ["pendente", "aprovado", "rejeitado"],
       plan_tier: ["free", "basico", "premium", "completo"],
