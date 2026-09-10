@@ -19,6 +19,7 @@ import { Route as AppSuporteRouteImport } from './routes/_app.suporte'
 import { Route as AppPlanosRouteImport } from './routes/_app.planos'
 import { Route as AppPerfilRouteImport } from './routes/_app.perfil'
 import { Route as AppPagamentosRouteImport } from './routes/_app.pagamentos'
+import { Route as AppMkAdminRouteImport } from './routes/_app.mk-admin'
 import { Route as AppMeusMateriaisRouteImport } from './routes/_app.meus-materiais'
 import { Route as AppMatematicaRouteImport } from './routes/_app.matematica'
 import { Route as AppLojaRouteImport } from './routes/_app.loja'
@@ -84,6 +85,11 @@ const AppPerfilRoute = AppPerfilRouteImport.update({
 const AppPagamentosRoute = AppPagamentosRouteImport.update({
   id: '/pagamentos',
   path: '/pagamentos',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMkAdminRoute = AppMkAdminRouteImport.update({
+  id: '/mk-admin',
+  path: '/mk-admin',
   getParentRoute: () => AppRoute,
 } as any)
 const AppMeusMateriaisRoute = AppMeusMateriaisRouteImport.update({
@@ -188,6 +194,7 @@ export interface FileRoutesByFullPath {
   '/loja': typeof AppLojaRoute
   '/matematica': typeof AppMatematicaRoute
   '/meus-materiais': typeof AppMeusMateriaisRoute
+  '/mk-admin': typeof AppMkAdminRoute
   '/pagamentos': typeof AppPagamentosRoute
   '/perfil': typeof AppPerfilRoute
   '/planos': typeof AppPlanosRoute
@@ -216,6 +223,7 @@ export interface FileRoutesByTo {
   '/loja': typeof AppLojaRoute
   '/matematica': typeof AppMatematicaRoute
   '/meus-materiais': typeof AppMeusMateriaisRoute
+  '/mk-admin': typeof AppMkAdminRoute
   '/pagamentos': typeof AppPagamentosRoute
   '/perfil': typeof AppPerfilRoute
   '/planos': typeof AppPlanosRoute
@@ -246,6 +254,7 @@ export interface FileRoutesById {
   '/_app/loja': typeof AppLojaRoute
   '/_app/matematica': typeof AppMatematicaRoute
   '/_app/meus-materiais': typeof AppMeusMateriaisRoute
+  '/_app/mk-admin': typeof AppMkAdminRoute
   '/_app/pagamentos': typeof AppPagamentosRoute
   '/_app/perfil': typeof AppPerfilRoute
   '/_app/planos': typeof AppPlanosRoute
@@ -276,6 +285,7 @@ export interface FileRouteTypes {
     | '/loja'
     | '/matematica'
     | '/meus-materiais'
+    | '/mk-admin'
     | '/pagamentos'
     | '/perfil'
     | '/planos'
@@ -304,6 +314,7 @@ export interface FileRouteTypes {
     | '/loja'
     | '/matematica'
     | '/meus-materiais'
+    | '/mk-admin'
     | '/pagamentos'
     | '/perfil'
     | '/planos'
@@ -333,6 +344,7 @@ export interface FileRouteTypes {
     | '/_app/loja'
     | '/_app/matematica'
     | '/_app/meus-materiais'
+    | '/_app/mk-admin'
     | '/_app/pagamentos'
     | '/_app/perfil'
     | '/_app/planos'
@@ -425,6 +437,13 @@ declare module '@tanstack/react-router' {
       path: '/pagamentos'
       fullPath: '/pagamentos'
       preLoaderRoute: typeof AppPagamentosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/mk-admin': {
+      id: '/_app/mk-admin'
+      path: '/mk-admin'
+      fullPath: '/mk-admin'
+      preLoaderRoute: typeof AppMkAdminRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/meus-materiais': {
@@ -575,6 +594,7 @@ interface AppRouteChildren {
   AppLojaRoute: typeof AppLojaRoute
   AppMatematicaRoute: typeof AppMatematicaRoute
   AppMeusMateriaisRoute: typeof AppMeusMateriaisRoute
+  AppMkAdminRoute: typeof AppMkAdminRoute
   AppPagamentosRoute: typeof AppPagamentosRoute
   AppPerfilRoute: typeof AppPerfilRoute
   AppPlanosRoute: typeof AppPlanosRoute
@@ -598,6 +618,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppLojaRoute: AppLojaRoute,
   AppMatematicaRoute: AppMatematicaRoute,
   AppMeusMateriaisRoute: AppMeusMateriaisRoute,
+  AppMkAdminRoute: AppMkAdminRoute,
   AppPagamentosRoute: AppPagamentosRoute,
   AppPerfilRoute: AppPerfilRoute,
   AppPlanosRoute: AppPlanosRoute,
