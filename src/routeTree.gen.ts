@@ -29,6 +29,7 @@ import { Route as AppExerciciosRouteImport } from './routes/_app.exercicios'
 import { Route as AppExamesRouteImport } from './routes/_app.exames'
 import { Route as AppConfiguracoesRouteImport } from './routes/_app.configuracoes'
 import { Route as AppChatRouteImport } from './routes/_app.chat'
+import { Route as AppAutorRouteImport } from './routes/_app.autor'
 import { Route as AppAfiliadosRouteImport } from './routes/_app.afiliados'
 import { Route as AppAdminRouteImport } from './routes/_app.admin'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
@@ -135,6 +136,11 @@ const AppChatRoute = AppChatRouteImport.update({
   path: '/chat',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAutorRoute = AppAutorRouteImport.update({
+  id: '/autor',
+  path: '/autor',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAfiliadosRoute = AppAfiliadosRouteImport.update({
   id: '/afiliados',
   path: '/afiliados',
@@ -171,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/admin': typeof AppAdminRoute
   '/afiliados': typeof AppAfiliadosRoute
+  '/autor': typeof AppAutorRoute
   '/chat': typeof AppChatRoute
   '/configuracoes': typeof AppConfiguracoesRoute
   '/exames': typeof AppExamesRoute
@@ -198,6 +205,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/admin': typeof AppAdminRoute
   '/afiliados': typeof AppAfiliadosRoute
+  '/autor': typeof AppAutorRoute
   '/chat': typeof AppChatRoute
   '/configuracoes': typeof AppConfiguracoesRoute
   '/exames': typeof AppExamesRoute
@@ -227,6 +235,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_app/admin': typeof AppAdminRoute
   '/_app/afiliados': typeof AppAfiliadosRoute
+  '/_app/autor': typeof AppAutorRoute
   '/_app/chat': typeof AppChatRoute
   '/_app/configuracoes': typeof AppConfiguracoesRoute
   '/_app/exames': typeof AppExamesRoute
@@ -256,6 +265,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/admin'
     | '/afiliados'
+    | '/autor'
     | '/chat'
     | '/configuracoes'
     | '/exames'
@@ -283,6 +293,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/admin'
     | '/afiliados'
+    | '/autor'
     | '/chat'
     | '/configuracoes'
     | '/exames'
@@ -311,6 +322,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_app/admin'
     | '/_app/afiliados'
+    | '/_app/autor'
     | '/_app/chat'
     | '/_app/configuracoes'
     | '/_app/exames'
@@ -485,6 +497,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppChatRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/autor': {
+      id: '/_app/autor'
+      path: '/autor'
+      fullPath: '/autor'
+      preLoaderRoute: typeof AppAutorRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/afiliados': {
       id: '/_app/afiliados'
       path: '/afiliados'
@@ -545,6 +564,7 @@ const AppFormulasRouteWithChildren = AppFormulasRoute._addFileChildren(
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRoute
   AppAfiliadosRoute: typeof AppAfiliadosRoute
+  AppAutorRoute: typeof AppAutorRoute
   AppChatRoute: typeof AppChatRoute
   AppConfiguracoesRoute: typeof AppConfiguracoesRoute
   AppExamesRoute: typeof AppExamesRoute
@@ -567,6 +587,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAdminRoute: AppAdminRoute,
   AppAfiliadosRoute: AppAfiliadosRoute,
+  AppAutorRoute: AppAutorRoute,
   AppChatRoute: AppChatRoute,
   AppConfiguracoesRoute: AppConfiguracoesRoute,
   AppExamesRoute: AppExamesRoute,
