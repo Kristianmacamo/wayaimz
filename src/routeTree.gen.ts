@@ -19,6 +19,7 @@ import { Route as AppSuporteRouteImport } from './routes/_app.suporte'
 import { Route as AppPlanosRouteImport } from './routes/_app.planos'
 import { Route as AppPerfilRouteImport } from './routes/_app.perfil'
 import { Route as AppPagamentosRouteImport } from './routes/_app.pagamentos'
+import { Route as AppMkAdminRouteImport } from './routes/_app.mk-admin'
 import { Route as AppMeusMateriaisRouteImport } from './routes/_app.meus-materiais'
 import { Route as AppMatematicaRouteImport } from './routes/_app.matematica'
 import { Route as AppLojaRouteImport } from './routes/_app.loja'
@@ -29,6 +30,7 @@ import { Route as AppExerciciosRouteImport } from './routes/_app.exercicios'
 import { Route as AppExamesRouteImport } from './routes/_app.exames'
 import { Route as AppConfiguracoesRouteImport } from './routes/_app.configuracoes'
 import { Route as AppChatRouteImport } from './routes/_app.chat'
+import { Route as AppAutorRouteImport } from './routes/_app.autor'
 import { Route as AppAfiliadosRouteImport } from './routes/_app.afiliados'
 import { Route as AppAdminRouteImport } from './routes/_app.admin'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
@@ -85,6 +87,11 @@ const AppPagamentosRoute = AppPagamentosRouteImport.update({
   path: '/pagamentos',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMkAdminRoute = AppMkAdminRouteImport.update({
+  id: '/mk-admin',
+  path: '/mk-admin',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMeusMateriaisRoute = AppMeusMateriaisRouteImport.update({
   id: '/meus-materiais',
   path: '/meus-materiais',
@@ -135,6 +142,11 @@ const AppChatRoute = AppChatRouteImport.update({
   path: '/chat',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAutorRoute = AppAutorRouteImport.update({
+  id: '/autor',
+  path: '/autor',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAfiliadosRoute = AppAfiliadosRouteImport.update({
   id: '/afiliados',
   path: '/afiliados',
@@ -171,6 +183,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/admin': typeof AppAdminRoute
   '/afiliados': typeof AppAfiliadosRoute
+  '/autor': typeof AppAutorRoute
   '/chat': typeof AppChatRoute
   '/configuracoes': typeof AppConfiguracoesRoute
   '/exames': typeof AppExamesRoute
@@ -181,6 +194,7 @@ export interface FileRoutesByFullPath {
   '/loja': typeof AppLojaRoute
   '/matematica': typeof AppMatematicaRoute
   '/meus-materiais': typeof AppMeusMateriaisRoute
+  '/mk-admin': typeof AppMkAdminRoute
   '/pagamentos': typeof AppPagamentosRoute
   '/perfil': typeof AppPerfilRoute
   '/planos': typeof AppPlanosRoute
@@ -198,6 +212,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/admin': typeof AppAdminRoute
   '/afiliados': typeof AppAfiliadosRoute
+  '/autor': typeof AppAutorRoute
   '/chat': typeof AppChatRoute
   '/configuracoes': typeof AppConfiguracoesRoute
   '/exames': typeof AppExamesRoute
@@ -208,6 +223,7 @@ export interface FileRoutesByTo {
   '/loja': typeof AppLojaRoute
   '/matematica': typeof AppMatematicaRoute
   '/meus-materiais': typeof AppMeusMateriaisRoute
+  '/mk-admin': typeof AppMkAdminRoute
   '/pagamentos': typeof AppPagamentosRoute
   '/perfil': typeof AppPerfilRoute
   '/planos': typeof AppPlanosRoute
@@ -227,6 +243,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_app/admin': typeof AppAdminRoute
   '/_app/afiliados': typeof AppAfiliadosRoute
+  '/_app/autor': typeof AppAutorRoute
   '/_app/chat': typeof AppChatRoute
   '/_app/configuracoes': typeof AppConfiguracoesRoute
   '/_app/exames': typeof AppExamesRoute
@@ -237,6 +254,7 @@ export interface FileRoutesById {
   '/_app/loja': typeof AppLojaRoute
   '/_app/matematica': typeof AppMatematicaRoute
   '/_app/meus-materiais': typeof AppMeusMateriaisRoute
+  '/_app/mk-admin': typeof AppMkAdminRoute
   '/_app/pagamentos': typeof AppPagamentosRoute
   '/_app/perfil': typeof AppPerfilRoute
   '/_app/planos': typeof AppPlanosRoute
@@ -256,6 +274,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/admin'
     | '/afiliados'
+    | '/autor'
     | '/chat'
     | '/configuracoes'
     | '/exames'
@@ -266,6 +285,7 @@ export interface FileRouteTypes {
     | '/loja'
     | '/matematica'
     | '/meus-materiais'
+    | '/mk-admin'
     | '/pagamentos'
     | '/perfil'
     | '/planos'
@@ -283,6 +303,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/admin'
     | '/afiliados'
+    | '/autor'
     | '/chat'
     | '/configuracoes'
     | '/exames'
@@ -293,6 +314,7 @@ export interface FileRouteTypes {
     | '/loja'
     | '/matematica'
     | '/meus-materiais'
+    | '/mk-admin'
     | '/pagamentos'
     | '/perfil'
     | '/planos'
@@ -311,6 +333,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_app/admin'
     | '/_app/afiliados'
+    | '/_app/autor'
     | '/_app/chat'
     | '/_app/configuracoes'
     | '/_app/exames'
@@ -321,6 +344,7 @@ export interface FileRouteTypes {
     | '/_app/loja'
     | '/_app/matematica'
     | '/_app/meus-materiais'
+    | '/_app/mk-admin'
     | '/_app/pagamentos'
     | '/_app/perfil'
     | '/_app/planos'
@@ -415,6 +439,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPagamentosRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/mk-admin': {
+      id: '/_app/mk-admin'
+      path: '/mk-admin'
+      fullPath: '/mk-admin'
+      preLoaderRoute: typeof AppMkAdminRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/meus-materiais': {
       id: '/_app/meus-materiais'
       path: '/meus-materiais'
@@ -485,6 +516,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppChatRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/autor': {
+      id: '/_app/autor'
+      path: '/autor'
+      fullPath: '/autor'
+      preLoaderRoute: typeof AppAutorRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/afiliados': {
       id: '/_app/afiliados'
       path: '/afiliados'
@@ -545,6 +583,7 @@ const AppFormulasRouteWithChildren = AppFormulasRoute._addFileChildren(
 interface AppRouteChildren {
   AppAdminRoute: typeof AppAdminRoute
   AppAfiliadosRoute: typeof AppAfiliadosRoute
+  AppAutorRoute: typeof AppAutorRoute
   AppChatRoute: typeof AppChatRoute
   AppConfiguracoesRoute: typeof AppConfiguracoesRoute
   AppExamesRoute: typeof AppExamesRoute
@@ -555,6 +594,7 @@ interface AppRouteChildren {
   AppLojaRoute: typeof AppLojaRoute
   AppMatematicaRoute: typeof AppMatematicaRoute
   AppMeusMateriaisRoute: typeof AppMeusMateriaisRoute
+  AppMkAdminRoute: typeof AppMkAdminRoute
   AppPagamentosRoute: typeof AppPagamentosRoute
   AppPerfilRoute: typeof AppPerfilRoute
   AppPlanosRoute: typeof AppPlanosRoute
@@ -567,6 +607,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAdminRoute: AppAdminRoute,
   AppAfiliadosRoute: AppAfiliadosRoute,
+  AppAutorRoute: AppAutorRoute,
   AppChatRoute: AppChatRoute,
   AppConfiguracoesRoute: AppConfiguracoesRoute,
   AppExamesRoute: AppExamesRoute,
@@ -577,6 +618,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppLojaRoute: AppLojaRoute,
   AppMatematicaRoute: AppMatematicaRoute,
   AppMeusMateriaisRoute: AppMeusMateriaisRoute,
+  AppMkAdminRoute: AppMkAdminRoute,
   AppPagamentosRoute: AppPagamentosRoute,
   AppPerfilRoute: AppPerfilRoute,
   AppPlanosRoute: AppPlanosRoute,
