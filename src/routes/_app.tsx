@@ -31,6 +31,7 @@ const NAV = [
 ] as const;
 
 const NAV_SECONDARY = [
+  { to: "/marketplace", label: "Marketplace", icon: Store },
   { to: "/loja", label: "Loja de Materiais", icon: ShoppingBag },
   { to: "/meus-materiais", label: "Meus Materiais", icon: Download },
   { to: "/autor", label: "Área do Autor", icon: PenSquare },
@@ -124,6 +125,11 @@ function AppLayout() {
           {isAdmin && (
             <Link to="/mk-admin" className={`mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${pathname.startsWith("/mk-admin") ? "bg-secondary-soft text-secondary font-semibold" : "hover:bg-sidebar-accent/60"}`}>
               <Store className="h-4 w-4" /> Admin Marketplace
+            </Link>
+          )}
+          {isAdmin && (
+            <Link to="/marketplace-admin" className={`mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${pathname.startsWith("/marketplace-admin") ? "bg-secondary-soft text-secondary font-semibold" : "hover:bg-sidebar-accent/60"}`}>
+              <Store className="h-4 w-4" /> Gerir Marketplace
             </Link>
           )}
         </nav>

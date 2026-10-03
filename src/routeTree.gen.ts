@@ -22,6 +22,7 @@ import { Route as AppPagamentosRouteImport } from './routes/_app.pagamentos'
 import { Route as AppMkAdminRouteImport } from './routes/_app.mk-admin'
 import { Route as AppMeusMateriaisRouteImport } from './routes/_app.meus-materiais'
 import { Route as AppMatematicaRouteImport } from './routes/_app.matematica'
+import { Route as AppMarketplaceAdminRouteImport } from './routes/_app.marketplace-admin'
 import { Route as AppLojaRouteImport } from './routes/_app.loja'
 import { Route as AppInicioRouteImport } from './routes/_app.inicio'
 import { Route as AppFormulasRouteImport } from './routes/_app.formulas'
@@ -33,8 +34,10 @@ import { Route as AppChatRouteImport } from './routes/_app.chat'
 import { Route as AppAutorRouteImport } from './routes/_app.autor'
 import { Route as AppAfiliadosRouteImport } from './routes/_app.afiliados'
 import { Route as AppAdminRouteImport } from './routes/_app.admin'
+import { Route as AppMarketplaceIndexRouteImport } from './routes/_app.marketplace.index'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 import { Route as ApiPublicMpesaCallbackRouteImport } from './routes/api/public/mpesa-callback'
+import { Route as AppMarketplaceIdRouteImport } from './routes/_app.marketplace.$id'
 import { Route as AppFormulasIdRouteImport } from './routes/_app.formulas.$id'
 import { Route as AppDocumentoIdRouteImport } from './routes/_app.documento.$id'
 
@@ -102,6 +105,11 @@ const AppMatematicaRoute = AppMatematicaRouteImport.update({
   path: '/matematica',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMarketplaceAdminRoute = AppMarketplaceAdminRouteImport.update({
+  id: '/marketplace-admin',
+  path: '/marketplace-admin',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppLojaRoute = AppLojaRouteImport.update({
   id: '/loja',
   path: '/loja',
@@ -157,6 +165,11 @@ const AppAdminRoute = AppAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMarketplaceIndexRoute = AppMarketplaceIndexRouteImport.update({
+  id: '/marketplace/',
+  path: '/marketplace/',
+  getParentRoute: () => AppRoute,
+} as any)
 const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   id: '/api/public/stripe-webhook',
   path: '/api/public/stripe-webhook',
@@ -166,6 +179,11 @@ const ApiPublicMpesaCallbackRoute = ApiPublicMpesaCallbackRouteImport.update({
   id: '/api/public/mpesa-callback',
   path: '/api/public/mpesa-callback',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppMarketplaceIdRoute = AppMarketplaceIdRouteImport.update({
+  id: '/marketplace/$id',
+  path: '/marketplace/$id',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppFormulasIdRoute = AppFormulasIdRouteImport.update({
   id: '/$id',
@@ -192,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/formulas': typeof AppFormulasRouteWithChildren
   '/inicio': typeof AppInicioRoute
   '/loja': typeof AppLojaRoute
+  '/marketplace-admin': typeof AppMarketplaceAdminRoute
   '/matematica': typeof AppMatematicaRoute
   '/meus-materiais': typeof AppMeusMateriaisRoute
   '/mk-admin': typeof AppMkAdminRoute
@@ -204,8 +223,10 @@ export interface FileRoutesByFullPath {
   '/api/chat': typeof ApiChatRoute
   '/documento/$id': typeof AppDocumentoIdRoute
   '/formulas/$id': typeof AppFormulasIdRoute
+  '/marketplace/$id': typeof AppMarketplaceIdRoute
   '/api/public/mpesa-callback': typeof ApiPublicMpesaCallbackRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
+  '/marketplace/': typeof AppMarketplaceIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -221,6 +242,7 @@ export interface FileRoutesByTo {
   '/formulas': typeof AppFormulasRouteWithChildren
   '/inicio': typeof AppInicioRoute
   '/loja': typeof AppLojaRoute
+  '/marketplace-admin': typeof AppMarketplaceAdminRoute
   '/matematica': typeof AppMatematicaRoute
   '/meus-materiais': typeof AppMeusMateriaisRoute
   '/mk-admin': typeof AppMkAdminRoute
@@ -233,8 +255,10 @@ export interface FileRoutesByTo {
   '/api/chat': typeof ApiChatRoute
   '/documento/$id': typeof AppDocumentoIdRoute
   '/formulas/$id': typeof AppFormulasIdRoute
+  '/marketplace/$id': typeof AppMarketplaceIdRoute
   '/api/public/mpesa-callback': typeof ApiPublicMpesaCallbackRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
+  '/marketplace': typeof AppMarketplaceIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -252,6 +276,7 @@ export interface FileRoutesById {
   '/_app/formulas': typeof AppFormulasRouteWithChildren
   '/_app/inicio': typeof AppInicioRoute
   '/_app/loja': typeof AppLojaRoute
+  '/_app/marketplace-admin': typeof AppMarketplaceAdminRoute
   '/_app/matematica': typeof AppMatematicaRoute
   '/_app/meus-materiais': typeof AppMeusMateriaisRoute
   '/_app/mk-admin': typeof AppMkAdminRoute
@@ -264,8 +289,10 @@ export interface FileRoutesById {
   '/api/chat': typeof ApiChatRoute
   '/_app/documento/$id': typeof AppDocumentoIdRoute
   '/_app/formulas/$id': typeof AppFormulasIdRoute
+  '/_app/marketplace/$id': typeof AppMarketplaceIdRoute
   '/api/public/mpesa-callback': typeof ApiPublicMpesaCallbackRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
+  '/_app/marketplace/': typeof AppMarketplaceIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -283,6 +310,7 @@ export interface FileRouteTypes {
     | '/formulas'
     | '/inicio'
     | '/loja'
+    | '/marketplace-admin'
     | '/matematica'
     | '/meus-materiais'
     | '/mk-admin'
@@ -295,8 +323,10 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/documento/$id'
     | '/formulas/$id'
+    | '/marketplace/$id'
     | '/api/public/mpesa-callback'
     | '/api/public/stripe-webhook'
+    | '/marketplace/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -312,6 +342,7 @@ export interface FileRouteTypes {
     | '/formulas'
     | '/inicio'
     | '/loja'
+    | '/marketplace-admin'
     | '/matematica'
     | '/meus-materiais'
     | '/mk-admin'
@@ -324,8 +355,10 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/documento/$id'
     | '/formulas/$id'
+    | '/marketplace/$id'
     | '/api/public/mpesa-callback'
     | '/api/public/stripe-webhook'
+    | '/marketplace'
   id:
     | '__root__'
     | '/'
@@ -342,6 +375,7 @@ export interface FileRouteTypes {
     | '/_app/formulas'
     | '/_app/inicio'
     | '/_app/loja'
+    | '/_app/marketplace-admin'
     | '/_app/matematica'
     | '/_app/meus-materiais'
     | '/_app/mk-admin'
@@ -354,8 +388,10 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/_app/documento/$id'
     | '/_app/formulas/$id'
+    | '/_app/marketplace/$id'
     | '/api/public/mpesa-callback'
     | '/api/public/stripe-webhook'
+    | '/_app/marketplace/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -460,6 +496,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMatematicaRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/marketplace-admin': {
+      id: '/_app/marketplace-admin'
+      path: '/marketplace-admin'
+      fullPath: '/marketplace-admin'
+      preLoaderRoute: typeof AppMarketplaceAdminRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/loja': {
       id: '/_app/loja'
       path: '/loja'
@@ -537,6 +580,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/marketplace/': {
+      id: '/_app/marketplace/'
+      path: '/marketplace'
+      fullPath: '/marketplace/'
+      preLoaderRoute: typeof AppMarketplaceIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/api/public/stripe-webhook': {
       id: '/api/public/stripe-webhook'
       path: '/api/public/stripe-webhook'
@@ -550,6 +600,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/public/mpesa-callback'
       preLoaderRoute: typeof ApiPublicMpesaCallbackRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/marketplace/$id': {
+      id: '/_app/marketplace/$id'
+      path: '/marketplace/$id'
+      fullPath: '/marketplace/$id'
+      preLoaderRoute: typeof AppMarketplaceIdRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/formulas/$id': {
       id: '/_app/formulas/$id'
@@ -592,6 +649,7 @@ interface AppRouteChildren {
   AppFormulasRoute: typeof AppFormulasRouteWithChildren
   AppInicioRoute: typeof AppInicioRoute
   AppLojaRoute: typeof AppLojaRoute
+  AppMarketplaceAdminRoute: typeof AppMarketplaceAdminRoute
   AppMatematicaRoute: typeof AppMatematicaRoute
   AppMeusMateriaisRoute: typeof AppMeusMateriaisRoute
   AppMkAdminRoute: typeof AppMkAdminRoute
@@ -602,6 +660,8 @@ interface AppRouteChildren {
   AppTestesRoute: typeof AppTestesRoute
   AppTrabalhosRoute: typeof AppTrabalhosRoute
   AppDocumentoIdRoute: typeof AppDocumentoIdRoute
+  AppMarketplaceIdRoute: typeof AppMarketplaceIdRoute
+  AppMarketplaceIndexRoute: typeof AppMarketplaceIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -616,6 +676,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppFormulasRoute: AppFormulasRouteWithChildren,
   AppInicioRoute: AppInicioRoute,
   AppLojaRoute: AppLojaRoute,
+  AppMarketplaceAdminRoute: AppMarketplaceAdminRoute,
   AppMatematicaRoute: AppMatematicaRoute,
   AppMeusMateriaisRoute: AppMeusMateriaisRoute,
   AppMkAdminRoute: AppMkAdminRoute,
@@ -626,6 +687,8 @@ const AppRouteChildren: AppRouteChildren = {
   AppTestesRoute: AppTestesRoute,
   AppTrabalhosRoute: AppTrabalhosRoute,
   AppDocumentoIdRoute: AppDocumentoIdRoute,
+  AppMarketplaceIdRoute: AppMarketplaceIdRoute,
+  AppMarketplaceIndexRoute: AppMarketplaceIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
