@@ -9,142 +9,52 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ApiChatRouteImport } from './routes/api/chat'
-import { Route as AppTrabalhosRouteImport } from './routes/_app.trabalhos'
-import { Route as AppTestesRouteImport } from './routes/_app.testes'
-import { Route as AppSuporteRouteImport } from './routes/_app.suporte'
-import { Route as AppPlanosRouteImport } from './routes/_app.planos'
-import { Route as AppPerfilRouteImport } from './routes/_app.perfil'
-import { Route as AppPagamentosRouteImport } from './routes/_app.pagamentos'
-import { Route as AppMkAdminRouteImport } from './routes/_app.mk-admin'
-import { Route as AppMeusMateriaisRouteImport } from './routes/_app.meus-materiais'
-import { Route as AppMatematicaRouteImport } from './routes/_app.matematica'
-import { Route as AppLojaRouteImport } from './routes/_app.loja'
-import { Route as AppInicioRouteImport } from './routes/_app.inicio'
-import { Route as AppFormulasRouteImport } from './routes/_app.formulas'
-import { Route as AppExplicacoesRouteImport } from './routes/_app.explicacoes'
-import { Route as AppExerciciosRouteImport } from './routes/_app.exercicios'
-import { Route as AppExamesRouteImport } from './routes/_app.exames'
-import { Route as AppConfiguracoesRouteImport } from './routes/_app.configuracoes'
-import { Route as AppChatRouteImport } from './routes/_app.chat'
-import { Route as AppAutorRouteImport } from './routes/_app.autor'
-import { Route as AppAfiliadosRouteImport } from './routes/_app.afiliados'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppAdminRouteImport } from './routes/_app.admin'
-import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
-import { Route as ApiPublicMpesaCallbackRouteImport } from './routes/api/public/mpesa-callback'
-import { Route as AppFormulasIdRouteImport } from './routes/_app.formulas.$id'
+import { Route as AppAfiliadosRouteImport } from './routes/_app.afiliados'
+import { Route as AppAutorRouteImport } from './routes/_app.autor'
+import { Route as AppChatRouteImport } from './routes/_app.chat'
+import { Route as AppConfiguracoesRouteImport } from './routes/_app.configuracoes'
+import { Route as AppExamesRouteImport } from './routes/_app.exames'
+import { Route as AppExerciciosRouteImport } from './routes/_app.exercicios'
+import { Route as AppExplicacoesRouteImport } from './routes/_app.explicacoes'
+import { Route as AppFormulasRouteImport } from './routes/_app.formulas'
+import { Route as AppInicioRouteImport } from './routes/_app.inicio'
+import { Route as AppLojaRouteImport } from './routes/_app.loja'
+import { Route as AppMatematicaRouteImport } from './routes/_app.matematica'
+import { Route as AppMeusMateriaisRouteImport } from './routes/_app.meus-materiais'
+import { Route as AppMkAdminRouteImport } from './routes/_app.mk-admin'
+import { Route as AppPagamentosRouteImport } from './routes/_app.pagamentos'
+import { Route as AppPerfilRouteImport } from './routes/_app.perfil'
+import { Route as AppPlanosRouteImport } from './routes/_app.planos'
+import { Route as AppSuporteRouteImport } from './routes/_app.suporte'
+import { Route as AppTestesRouteImport } from './routes/_app.testes'
+import { Route as AppTrabalhosRouteImport } from './routes/_app.trabalhos'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AppDocumentoIdRouteImport } from './routes/_app.documento.$id'
+import { Route as AppFormulasIdRouteImport } from './routes/_app.formulas.$id'
+import { Route as ApiPublicMpesaCallbackRouteImport } from './routes/api/public/mpesa-callback'
+import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiChatRoute = ApiChatRouteImport.update({
-  id: '/api/chat',
-  path: '/api/chat',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppTrabalhosRoute = AppTrabalhosRouteImport.update({
-  id: '/trabalhos',
-  path: '/trabalhos',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppTestesRoute = AppTestesRouteImport.update({
-  id: '/testes',
-  path: '/testes',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppSuporteRoute = AppSuporteRouteImport.update({
-  id: '/suporte',
-  path: '/suporte',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppPlanosRoute = AppPlanosRouteImport.update({
-  id: '/planos',
-  path: '/planos',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppPerfilRoute = AppPerfilRouteImport.update({
-  id: '/perfil',
-  path: '/perfil',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppPagamentosRoute = AppPagamentosRouteImport.update({
-  id: '/pagamentos',
-  path: '/pagamentos',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppMkAdminRoute = AppMkAdminRouteImport.update({
-  id: '/mk-admin',
-  path: '/mk-admin',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppMeusMateriaisRoute = AppMeusMateriaisRouteImport.update({
-  id: '/meus-materiais',
-  path: '/meus-materiais',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppMatematicaRoute = AppMatematicaRouteImport.update({
-  id: '/matematica',
-  path: '/matematica',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppLojaRoute = AppLojaRouteImport.update({
-  id: '/loja',
-  path: '/loja',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppInicioRoute = AppInicioRouteImport.update({
-  id: '/inicio',
-  path: '/inicio',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppFormulasRoute = AppFormulasRouteImport.update({
-  id: '/formulas',
-  path: '/formulas',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppExplicacoesRoute = AppExplicacoesRouteImport.update({
-  id: '/explicacoes',
-  path: '/explicacoes',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppExerciciosRoute = AppExerciciosRouteImport.update({
-  id: '/exercicios',
-  path: '/exercicios',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppExamesRoute = AppExamesRouteImport.update({
-  id: '/exames',
-  path: '/exames',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppConfiguracoesRoute = AppConfiguracoesRouteImport.update({
-  id: '/configuracoes',
-  path: '/configuracoes',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppChatRoute = AppChatRouteImport.update({
-  id: '/chat',
-  path: '/chat',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppAutorRoute = AppAutorRouteImport.update({
-  id: '/autor',
-  path: '/autor',
+const AppAdminRoute = AppAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAfiliadosRoute = AppAfiliadosRouteImport.update({
@@ -152,30 +62,120 @@ const AppAfiliadosRoute = AppAfiliadosRouteImport.update({
   path: '/afiliados',
   getParentRoute: () => AppRoute,
 } as any)
-const AppAdminRoute = AppAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const AppAutorRoute = AppAutorRouteImport.update({
+  id: '/autor',
+  path: '/autor',
   getParentRoute: () => AppRoute,
 } as any)
-const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
-  id: '/api/public/stripe-webhook',
-  path: '/api/public/stripe-webhook',
+const AppChatRoute = AppChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppConfiguracoesRoute = AppConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppExamesRoute = AppExamesRouteImport.update({
+  id: '/exames',
+  path: '/exames',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppExerciciosRoute = AppExerciciosRouteImport.update({
+  id: '/exercicios',
+  path: '/exercicios',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppExplicacoesRoute = AppExplicacoesRouteImport.update({
+  id: '/explicacoes',
+  path: '/explicacoes',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFormulasRoute = AppFormulasRouteImport.update({
+  id: '/formulas',
+  path: '/formulas',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInicioRoute = AppInicioRouteImport.update({
+  id: '/inicio',
+  path: '/inicio',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLojaRoute = AppLojaRouteImport.update({
+  id: '/loja',
+  path: '/loja',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMatematicaRoute = AppMatematicaRouteImport.update({
+  id: '/matematica',
+  path: '/matematica',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMeusMateriaisRoute = AppMeusMateriaisRouteImport.update({
+  id: '/meus-materiais',
+  path: '/meus-materiais',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMkAdminRoute = AppMkAdminRouteImport.update({
+  id: '/mk-admin',
+  path: '/mk-admin',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPagamentosRoute = AppPagamentosRouteImport.update({
+  id: '/pagamentos',
+  path: '/pagamentos',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPerfilRoute = AppPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPlanosRoute = AppPlanosRouteImport.update({
+  id: '/planos',
+  path: '/planos',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSuporteRoute = AppSuporteRouteImport.update({
+  id: '/suporte',
+  path: '/suporte',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTestesRoute = AppTestesRouteImport.update({
+  id: '/testes',
+  path: '/testes',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTrabalhosRoute = AppTrabalhosRouteImport.update({
+  id: '/trabalhos',
+  path: '/trabalhos',
+  getParentRoute: () => AppRoute,
+} as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicMpesaCallbackRoute = ApiPublicMpesaCallbackRouteImport.update({
-  id: '/api/public/mpesa-callback',
-  path: '/api/public/mpesa-callback',
-  getParentRoute: () => rootRouteImport,
+const AppDocumentoIdRoute = AppDocumentoIdRouteImport.update({
+  id: '/documento/$id',
+  path: '/documento/$id',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppFormulasIdRoute = AppFormulasIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => AppFormulasRoute,
 } as any)
-const AppDocumentoIdRoute = AppDocumentoIdRouteImport.update({
-  id: '/documento/$id',
-  path: '/documento/$id',
-  getParentRoute: () => AppRoute,
+const ApiPublicMpesaCallbackRoute = ApiPublicMpesaCallbackRouteImport.update({
+  id: '/api/public/mpesa-callback',
+  path: '/api/public/mpesa-callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
+  id: '/api/public/stripe-webhook',
+  path: '/api/public/stripe-webhook',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -369,11 +369,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app': {
@@ -383,144 +383,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/chat': {
-      id: '/api/chat'
-      path: '/api/chat'
-      fullPath: '/api/chat'
-      preLoaderRoute: typeof ApiChatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_app/trabalhos': {
-      id: '/_app/trabalhos'
-      path: '/trabalhos'
-      fullPath: '/trabalhos'
-      preLoaderRoute: typeof AppTrabalhosRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/testes': {
-      id: '/_app/testes'
-      path: '/testes'
-      fullPath: '/testes'
-      preLoaderRoute: typeof AppTestesRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/suporte': {
-      id: '/_app/suporte'
-      path: '/suporte'
-      fullPath: '/suporte'
-      preLoaderRoute: typeof AppSuporteRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/planos': {
-      id: '/_app/planos'
-      path: '/planos'
-      fullPath: '/planos'
-      preLoaderRoute: typeof AppPlanosRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/perfil': {
-      id: '/_app/perfil'
-      path: '/perfil'
-      fullPath: '/perfil'
-      preLoaderRoute: typeof AppPerfilRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/pagamentos': {
-      id: '/_app/pagamentos'
-      path: '/pagamentos'
-      fullPath: '/pagamentos'
-      preLoaderRoute: typeof AppPagamentosRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/mk-admin': {
-      id: '/_app/mk-admin'
-      path: '/mk-admin'
-      fullPath: '/mk-admin'
-      preLoaderRoute: typeof AppMkAdminRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/meus-materiais': {
-      id: '/_app/meus-materiais'
-      path: '/meus-materiais'
-      fullPath: '/meus-materiais'
-      preLoaderRoute: typeof AppMeusMateriaisRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/matematica': {
-      id: '/_app/matematica'
-      path: '/matematica'
-      fullPath: '/matematica'
-      preLoaderRoute: typeof AppMatematicaRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/loja': {
-      id: '/_app/loja'
-      path: '/loja'
-      fullPath: '/loja'
-      preLoaderRoute: typeof AppLojaRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/inicio': {
-      id: '/_app/inicio'
-      path: '/inicio'
-      fullPath: '/inicio'
-      preLoaderRoute: typeof AppInicioRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/formulas': {
-      id: '/_app/formulas'
-      path: '/formulas'
-      fullPath: '/formulas'
-      preLoaderRoute: typeof AppFormulasRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/explicacoes': {
-      id: '/_app/explicacoes'
-      path: '/explicacoes'
-      fullPath: '/explicacoes'
-      preLoaderRoute: typeof AppExplicacoesRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/exercicios': {
-      id: '/_app/exercicios'
-      path: '/exercicios'
-      fullPath: '/exercicios'
-      preLoaderRoute: typeof AppExerciciosRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/exames': {
-      id: '/_app/exames'
-      path: '/exames'
-      fullPath: '/exames'
-      preLoaderRoute: typeof AppExamesRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/configuracoes': {
-      id: '/_app/configuracoes'
-      path: '/configuracoes'
-      fullPath: '/configuracoes'
-      preLoaderRoute: typeof AppConfiguracoesRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/chat': {
-      id: '/_app/chat'
-      path: '/chat'
-      fullPath: '/chat'
-      preLoaderRoute: typeof AppChatRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/autor': {
-      id: '/_app/autor'
-      path: '/autor'
-      fullPath: '/autor'
-      preLoaderRoute: typeof AppAutorRouteImport
+    '/_app/admin': {
+      id: '/_app/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/afiliados': {
@@ -530,26 +404,145 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAfiliadosRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/admin': {
-      id: '/_app/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AppAdminRouteImport
+    '/_app/autor': {
+      id: '/_app/autor'
+      path: '/autor'
+      fullPath: '/autor'
+      preLoaderRoute: typeof AppAutorRouteImport
       parentRoute: typeof AppRoute
     }
-    '/api/public/stripe-webhook': {
-      id: '/api/public/stripe-webhook'
-      path: '/api/public/stripe-webhook'
-      fullPath: '/api/public/stripe-webhook'
-      preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
+    '/_app/chat': {
+      id: '/_app/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof AppChatRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/configuracoes': {
+      id: '/_app/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof AppConfiguracoesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/exames': {
+      id: '/_app/exames'
+      path: '/exames'
+      fullPath: '/exames'
+      preLoaderRoute: typeof AppExamesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/exercicios': {
+      id: '/_app/exercicios'
+      path: '/exercicios'
+      fullPath: '/exercicios'
+      preLoaderRoute: typeof AppExerciciosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/explicacoes': {
+      id: '/_app/explicacoes'
+      path: '/explicacoes'
+      fullPath: '/explicacoes'
+      preLoaderRoute: typeof AppExplicacoesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/formulas': {
+      id: '/_app/formulas'
+      path: '/formulas'
+      fullPath: '/formulas'
+      preLoaderRoute: typeof AppFormulasRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/inicio': {
+      id: '/_app/inicio'
+      path: '/inicio'
+      fullPath: '/inicio'
+      preLoaderRoute: typeof AppInicioRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/loja': {
+      id: '/_app/loja'
+      path: '/loja'
+      fullPath: '/loja'
+      preLoaderRoute: typeof AppLojaRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/matematica': {
+      id: '/_app/matematica'
+      path: '/matematica'
+      fullPath: '/matematica'
+      preLoaderRoute: typeof AppMatematicaRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/meus-materiais': {
+      id: '/_app/meus-materiais'
+      path: '/meus-materiais'
+      fullPath: '/meus-materiais'
+      preLoaderRoute: typeof AppMeusMateriaisRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/mk-admin': {
+      id: '/_app/mk-admin'
+      path: '/mk-admin'
+      fullPath: '/mk-admin'
+      preLoaderRoute: typeof AppMkAdminRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/pagamentos': {
+      id: '/_app/pagamentos'
+      path: '/pagamentos'
+      fullPath: '/pagamentos'
+      preLoaderRoute: typeof AppPagamentosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/perfil': {
+      id: '/_app/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof AppPerfilRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/planos': {
+      id: '/_app/planos'
+      path: '/planos'
+      fullPath: '/planos'
+      preLoaderRoute: typeof AppPlanosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/suporte': {
+      id: '/_app/suporte'
+      path: '/suporte'
+      fullPath: '/suporte'
+      preLoaderRoute: typeof AppSuporteRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/testes': {
+      id: '/_app/testes'
+      path: '/testes'
+      fullPath: '/testes'
+      preLoaderRoute: typeof AppTestesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/trabalhos': {
+      id: '/_app/trabalhos'
+      path: '/trabalhos'
+      fullPath: '/trabalhos'
+      preLoaderRoute: typeof AppTrabalhosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/mpesa-callback': {
-      id: '/api/public/mpesa-callback'
-      path: '/api/public/mpesa-callback'
-      fullPath: '/api/public/mpesa-callback'
-      preLoaderRoute: typeof ApiPublicMpesaCallbackRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_app/documento/$id': {
+      id: '/_app/documento/$id'
+      path: '/documento/$id'
+      fullPath: '/documento/$id'
+      preLoaderRoute: typeof AppDocumentoIdRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/formulas/$id': {
       id: '/_app/formulas/$id'
@@ -558,12 +551,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppFormulasIdRouteImport
       parentRoute: typeof AppFormulasRoute
     }
-    '/_app/documento/$id': {
-      id: '/_app/documento/$id'
-      path: '/documento/$id'
-      fullPath: '/documento/$id'
-      preLoaderRoute: typeof AppDocumentoIdRouteImport
-      parentRoute: typeof AppRoute
+    '/api/public/mpesa-callback': {
+      id: '/api/public/mpesa-callback'
+      path: '/api/public/mpesa-callback'
+      fullPath: '/api/public/mpesa-callback'
+      preLoaderRoute: typeof ApiPublicMpesaCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/stripe-webhook': {
+      id: '/api/public/stripe-webhook'
+      path: '/api/public/stripe-webhook'
+      fullPath: '/api/public/stripe-webhook'
+      preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
