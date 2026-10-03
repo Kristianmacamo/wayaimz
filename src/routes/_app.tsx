@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, redirect, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { GraduationCap, MessageSquare, BookOpen, Beaker, ClipboardCheck, FileText, CreditCard, Users, User as UserIcon, LifeBuoy, LogOut, Menu, X, Shield, Wallet, Home, Calculator, Sigma, Lightbulb, Settings } from "lucide-react";
+import { GraduationCap, MessageSquare, BookOpen, Beaker, ClipboardCheck, FileText, CreditCard, Users, User as UserIcon, LifeBuoy, LogOut, Menu, X, Shield, Wallet, Home, Calculator, Sigma, Lightbulb, Settings, ShoppingBag, Download, PenSquare, Store } from "lucide-react";
 import { AppTabBar } from "@/components/AppTabBar";
 
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,9 @@ const NAV = [
 ] as const;
 
 const NAV_SECONDARY = [
+  { to: "/loja", label: "Loja de Materiais", icon: ShoppingBag },
+  { to: "/meus-materiais", label: "Meus Materiais", icon: Download },
+  { to: "/autor", label: "Área do Autor", icon: PenSquare },
   { to: "/testes", label: "Testes", icon: ClipboardCheck },
   { to: "/exames", label: "Exames", icon: FileText },
   { to: "/pagamentos", label: "Pagamentos", icon: Wallet },
@@ -116,6 +119,11 @@ function AppLayout() {
           {isAdmin && (
             <Link to="/admin" className={`mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${pathname.startsWith("/admin") ? "bg-secondary-soft text-secondary font-semibold" : "hover:bg-sidebar-accent/60"}`}>
               <Shield className="h-4 w-4" /> Administração
+            </Link>
+          )}
+          {isAdmin && (
+            <Link to="/mk-admin" className={`mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${pathname.startsWith("/mk-admin") ? "bg-secondary-soft text-secondary font-semibold" : "hover:bg-sidebar-accent/60"}`}>
+              <Store className="h-4 w-4" /> Admin Marketplace
             </Link>
           )}
         </nav>
