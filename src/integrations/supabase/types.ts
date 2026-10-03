@@ -523,6 +523,101 @@ export type Database = {
         }
         Relationships: []
       }
+      shop_payment_links: {
+        Row: {
+          link: string
+          product_id: string
+        }
+        Insert: {
+          link: string
+          product_id: string
+        }
+        Update: {
+          link?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_payment_links_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "shop_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shop_products: {
+        Row: {
+          activo: boolean
+          beneficios: string
+          capa_url: string | null
+          categoria: string
+          created_at: string
+          descricao: string
+          descricao_curta: string
+          destaque: boolean
+          id: string
+          nome: string
+          o_que_recebe: string
+          preco: number
+          updated_at: string
+          vendas: number
+        }
+        Insert: {
+          activo?: boolean
+          beneficios?: string
+          capa_url?: string | null
+          categoria?: string
+          created_at?: string
+          descricao?: string
+          descricao_curta?: string
+          destaque?: boolean
+          id?: string
+          nome: string
+          o_que_recebe?: string
+          preco?: number
+          updated_at?: string
+          vendas?: number
+        }
+        Update: {
+          activo?: boolean
+          beneficios?: string
+          capa_url?: string | null
+          categoria?: string
+          created_at?: string
+          descricao?: string
+          descricao_curta?: string
+          destaque?: boolean
+          id?: string
+          nome?: string
+          o_que_recebe?: string
+          preco?: number
+          updated_at?: string
+          vendas?: number
+        }
+        Relationships: []
+      }
+      shop_settings: {
+        Row: {
+          id: number
+          messenger: string
+          updated_at: string
+          whatsapp: string
+        }
+        Insert: {
+          id?: number
+          messenger?: string
+          updated_at?: string
+          whatsapp?: string
+        }
+        Update: {
+          id?: number
+          messenger?: string
+          updated_at?: string
+          whatsapp?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           amount: number
@@ -601,6 +696,7 @@ export type Database = {
     Functions: {
       expire_subscriptions: { Args: never; Returns: undefined }
       generate_affiliate_code: { Args: never; Returns: string }
+      get_shop_payment_link: { Args: { _product_id: string }; Returns: string }
       has_active_subscription: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
