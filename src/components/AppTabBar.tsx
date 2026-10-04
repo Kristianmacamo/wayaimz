@@ -4,7 +4,7 @@ import { Home, Calculator, ShoppingBag, BookOpen, User } from "lucide-react";
 const TABS = [
   { to: "/inicio", label: "Início", icon: Home },
   { to: "/formulas", label: "Fórmulas", icon: Calculator },
-  { to: "/loja", label: "Loja", icon: ShoppingBag },
+  { to: "/marketplace", label: "Marketplace", icon: ShoppingBag },
   { to: "/trabalhos", label: "Trabalhos", icon: BookOpen },
   { to: "/perfil", label: "Conta", icon: User },
 ] as const;
