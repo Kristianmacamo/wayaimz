@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RichText } from "@/components/RichText";
 import { exportPdf, exportWord, type DocSection } from "@/lib/export-doc";
 import { ArrowLeft, Download, Eye, Loader2, Pencil, Save } from "lucide-react";
+import { Carregando } from "@/components/Carregando";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/documento/$id")({
@@ -81,11 +82,7 @@ function DocumentoPage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="grid h-64 place-items-center">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-      </div>
-    );
+    return <Carregando detalhe="A abrir o documento..." />;
   }
 
   if (!doc) {
@@ -99,6 +96,9 @@ function DocumentoPage() {
 
   return (
     <div className="mx-auto max-w-3xl p-5 pb-28 md:p-10">
+      {exporting && (
+        <Carregando detalhe={exporting === "pdf" ? "A preparar o PDF..." : "A preparar o ficheiro Word..."} />
+      )}
       <Button asChild variant="ghost" size="sm" className="mb-3 -ml-2">
         <Link to="/trabalhos"><ArrowLeft className="mr-1 h-4 w-4" /> Trabalhos</Link>
       </Button>
