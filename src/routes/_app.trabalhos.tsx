@@ -121,7 +121,7 @@ function TrabalhosPage() {
               <p className="mt-1 text-sm text-muted-foreground">
                 A geração de Trabalhos Académicos está incluída no plano <strong>Semanal Premium (180 MT)</strong> e no
                 plano <strong>Mensal Premium (300 MT)</strong>. Depois de pagar, gera trabalhos completos e descarrega
-                em Word, PDF ou HTML/CSS.
+                em Word ou PDF.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <Button asChild className="bg-gradient-hero">
@@ -216,6 +216,36 @@ function TrabalhosPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {mutation.isPending && (
+        <div
+          className="fixed inset-0 z-[100] grid place-items-center bg-foreground text-background"
+          role="status"
+          aria-live="polite"
+          aria-label="A gerar trabalho académico"
+        >
+          <div className="flex flex-col items-center gap-5">
+            <div className="relative h-12 w-12 animate-spin motion-reduce:animate-none" aria-hidden="true">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <span
+                  key={index}
+                  className="absolute left-1/2 top-1/2 h-2.5 w-2.5 rounded-full bg-background"
+                  style={{
+                    opacity: 0.25 + index * 0.1,
+                    transform: `translate(-50%, -50%) rotate(${index * 45}deg) translateY(-18px)`,
+                  }}
+                />
+              ))}
+            </div>
+            <div className="text-center">
+              <p className="font-display text-lg font-semibold">Carregando</p>
+              <p className="mt-1 text-sm text-background/70">
+                A criar o trabalho de {MINUTES_TO_PAGES[minutos]} páginas · {Math.floor(elapsed / 60)}:{String(elapsed % 60).padStart(2, "0")}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <h2 className="mb-3 mt-9 font-display text-xl font-bold">Os meus documentos</h2>
       {!docs?.length ? (
