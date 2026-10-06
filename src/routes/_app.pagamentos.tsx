@@ -96,22 +96,15 @@ function PaysuiteCard({ planId, amount }: { planId: PaidPlanId; amount: number }
     <Card className="space-y-3 p-5">
       <div className="flex items-center gap-2">
         <Smartphone className="h-5 w-5 text-primary" />
-        <p className="font-medium">e-Mola ou M-Pesa</p>
+        <p className="font-medium">e-Mola (Movitel)</p>
       </div>
       <p className="text-sm text-muted-foreground">
-        Escolha a carteira, introduza o seu número na página segura da PaySuite e confirme com o PIN. O plano é activado
-        automaticamente.
+        Introduza o seu número e-Mola na página segura e confirme com o PIN. O plano é activado automaticamente.
       </p>
-      <div className="grid gap-2 sm:grid-cols-2">
-        <Button onClick={() => pay("emola")} disabled={!!busy} className="w-full bg-gradient-hero">
-          {busy === "emola" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Smartphone className="mr-2 h-4 w-4" />}
-          Pagar {amount} MT com e-Mola
-        </Button>
-        <Button onClick={() => pay("mpesa")} disabled={!!busy} variant="outline" className="w-full">
-          {busy === "mpesa" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Smartphone className="mr-2 h-4 w-4" />}
-          Pagar {amount} MT com M-Pesa
-        </Button>
-      </div>
+      <Button onClick={() => pay("emola")} disabled={!!busy} variant="outline" className="w-full">
+        {busy === "emola" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Smartphone className="mr-2 h-4 w-4" />}
+        Pagar {amount} MT com e-Mola
+      </Button>
     </Card>
   );
 }
@@ -226,6 +219,15 @@ function PagamentosPage() {
       </Link>
 
       <div className="mt-6 grid gap-4">
+        <MpesaForm
+          planId={selected.id}
+          amount={selected.price}
+          onDone={() => {
+            qc.invalidateQueries({ queryKey: ["my-payments"] });
+            qc.invalidateQueries({ queryKey: ["my-subscription"] });
+            qc.invalidateQueries({ queryKey: ["my-profile"] });
+          }}
+        />
         <PaysuiteCard planId={selected.id} amount={selected.price} />
         <StripeCard planId={selected.id} amount={selected.price} planName={selected.name} />
       </div>
