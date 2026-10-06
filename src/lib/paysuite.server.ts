@@ -39,6 +39,7 @@ export async function createPaysuiteCheckout(
       plan: input.plan,
       amount: plan.price,
       payment_reference: reference,
+      phone_number: "PaySuite",
       provider: `paysuite_${input.method}`,
       status: "a_processar",
     })
