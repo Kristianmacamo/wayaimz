@@ -8,7 +8,7 @@ import { Smartphone, CheckCircle2, Loader2, ShieldCheck, XCircle, CreditCard } f
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { startMpesaPayment, startStripeCheckout } from "@/lib/payments.functions";
+import { startMpesaPayment, startStripeCheckout, startPaysuiteCheckout, checkPaysuitePayment } from "@/lib/payments.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/pagamentos")({
@@ -23,9 +23,10 @@ export const Route = createFileRoute("/_app/pagamentos")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  validateSearch: (s: Record<string, unknown>): { plan: PaidPlanId; stripe?: "sucesso" | "cancelado" } => ({
+  validateSearch: (s: Record<string, unknown>): { plan: PaidPlanId; stripe?: "sucesso" | "cancelado"; ps?: string } => ({
     plan: (typeof s.plan === "string" && isPaidPlan(s.plan) ? s.plan : "semanal_premium") as PaidPlanId,
     ...(s.stripe === "sucesso" || s.stripe === "cancelado" ? { stripe: s.stripe as "sucesso" | "cancelado" } : {}),
+    ...(typeof s.ps === "string" ? { ps: s.ps } : {}),
   }),
 });
 
@@ -74,8 +75,74 @@ function StripeCard({ planId, amount, planName }: { planId: PaidPlanId; amount: 
   );
 }
 
+function PaysuiteCard({ planId, amount }: { planId: PaidPlanId; amount: number }) {
+  const [busy, setBusy] = useState<null | "mpesa" | "emola">(null);
+  const start = useServerFn(startPaysuiteCheckout);
+  async function pay(method: "mpesa" | "emola") {
+    setBusy(method);
+    try {
+      const res = await start({ data: { plan: planId, method, origin: window.location.origin } });
+      if (res.ok && res.url) {
+        window.location.href = res.url;
+        return;
+      }
+      toast.error(res.message);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro ao abrir o pagamento.");
+    }
+    setBusy(null);
+  }
+  return (
+    <Card className="space-y-3 p-5">
+      <div className="flex items-center gap-2">
+        <Smartphone className="h-5 w-5 text-primary" />
+        <p className="font-medium">e-Mola ou M-Pesa</p>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        Escolha a carteira, introduza o seu número na página segura da PaySuite e confirme com o PIN. O plano é activado
+        automaticamente.
+      </p>
+      <div className="grid gap-2 sm:grid-cols-2">
+        <Button onClick={() => pay("emola")} disabled={!!busy} className="w-full bg-gradient-hero">
+          {busy === "emola" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Smartphone className="mr-2 h-4 w-4" />}
+          Pagar {amount} MT com e-Mola
+        </Button>
+        <Button onClick={() => pay("mpesa")} disabled={!!busy} variant="outline" className="w-full">
+          {busy === "mpesa" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Smartphone className="mr-2 h-4 w-4" />}
+          Pagar {amount} MT com M-Pesa
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
+function PaysuiteReturn({ paymentId }: { paymentId: string }) {
+  const check = useServerFn(checkPaysuitePayment);
+  const qc = useQueryClient();
+  const { data } = useQuery({
+    queryKey: ["ps-check", paymentId],
+    queryFn: async () => {
+      const r = await check({ data: { paymentId } });
+      if (r.status === "concluido") {
+        qc.invalidateQueries({ queryKey: ["my-payments"] });
+        qc.invalidateQueries({ queryKey: ["my-subscription"] });
+        qc.invalidateQueries({ queryKey: ["my-profile"] });
+      }
+      return r;
+    },
+    refetchInterval: (q) => (q.state.data?.status === "a_processar" ? 4000 : false),
+  });
+  const ok = data?.status === "concluido";
+  return (
+    <Card className={`mt-6 flex items-center gap-3 p-4 text-sm ${ok ? "border-secondary/40 bg-secondary-soft/40" : ""}`}>
+      {ok ? <CheckCircle2 className="h-5 w-5 text-secondary" /> : <Loader2 className="h-5 w-5 animate-spin" />}
+      {data?.message ?? "A verificar o pagamento..."}
+    </Card>
+  );
+}
+
 function PagamentosPage() {
-  const { plan, stripe } = Route.useSearch();
+  const { plan, stripe, ps } = Route.useSearch();
   const qc = useQueryClient();
   const [selectedId, setSelectedId] = useState<PaidPlanId>(plan);
   const selected = PLANS[selectedId];
@@ -121,6 +188,8 @@ function PagamentosPage() {
       )}
 
 
+      {ps && <PaysuiteReturn paymentId={ps} />}
+
       {subscription && (
         <Card className="mt-6 flex items-center gap-3 border-secondary/40 bg-secondary-soft/40 p-4">
           <ShieldCheck className="h-5 w-5 text-secondary" />
@@ -157,15 +226,7 @@ function PagamentosPage() {
       </Link>
 
       <div className="mt-6 grid gap-4">
-        <MpesaForm
-          planId={selected.id}
-          amount={selected.price}
-          onDone={() => {
-            qc.invalidateQueries({ queryKey: ["my-payments"] });
-            qc.invalidateQueries({ queryKey: ["my-subscription"] });
-            qc.invalidateQueries({ queryKey: ["my-profile"] });
-          }}
-        />
+        <PaysuiteCard planId={selected.id} amount={selected.price} />
         <StripeCard planId={selected.id} amount={selected.price} planName={selected.name} />
       </div>
 
