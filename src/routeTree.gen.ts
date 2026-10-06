@@ -39,6 +39,7 @@ import { Route as AppFormulasIdRouteImport } from './routes/_app.formulas.$id'
 import { Route as AppMarketplaceIndexRouteImport } from './routes/_app.marketplace.index'
 import { Route as AppMarketplaceIdRouteImport } from './routes/_app.marketplace.$id'
 import { Route as ApiPublicMpesaCallbackRouteImport } from './routes/api/public/mpesa-callback'
+import { Route as ApiPublicPaysuiteWebhookRouteImport } from './routes/api/public/paysuite-webhook'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -190,6 +191,12 @@ const ApiPublicMpesaCallbackRoute = ApiPublicMpesaCallbackRouteImport.update({
   path: '/api/public/mpesa-callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicPaysuiteWebhookRoute =
+  ApiPublicPaysuiteWebhookRouteImport.update({
+    id: '/api/public/paysuite-webhook',
+    path: '/api/public/paysuite-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   id: '/api/public/stripe-webhook',
   path: '/api/public/stripe-webhook',
@@ -225,6 +232,7 @@ export interface FileRoutesByFullPath {
   '/formulas/$id': typeof AppFormulasIdRoute
   '/marketplace/$id': typeof AppMarketplaceIdRoute
   '/api/public/mpesa-callback': typeof ApiPublicMpesaCallbackRoute
+  '/api/public/paysuite-webhook': typeof ApiPublicPaysuiteWebhookRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/marketplace/': typeof AppMarketplaceIndexRoute
 }
@@ -257,6 +265,7 @@ export interface FileRoutesByTo {
   '/formulas/$id': typeof AppFormulasIdRoute
   '/marketplace/$id': typeof AppMarketplaceIdRoute
   '/api/public/mpesa-callback': typeof ApiPublicMpesaCallbackRoute
+  '/api/public/paysuite-webhook': typeof ApiPublicPaysuiteWebhookRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/marketplace': typeof AppMarketplaceIndexRoute
 }
@@ -291,6 +300,7 @@ export interface FileRoutesById {
   '/_app/formulas/$id': typeof AppFormulasIdRoute
   '/_app/marketplace/$id': typeof AppMarketplaceIdRoute
   '/api/public/mpesa-callback': typeof ApiPublicMpesaCallbackRoute
+  '/api/public/paysuite-webhook': typeof ApiPublicPaysuiteWebhookRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/_app/marketplace/': typeof AppMarketplaceIndexRoute
 }
@@ -325,6 +335,7 @@ export interface FileRouteTypes {
     | '/formulas/$id'
     | '/marketplace/$id'
     | '/api/public/mpesa-callback'
+    | '/api/public/paysuite-webhook'
     | '/api/public/stripe-webhook'
     | '/marketplace/'
   fileRoutesByTo: FileRoutesByTo
@@ -357,6 +368,7 @@ export interface FileRouteTypes {
     | '/formulas/$id'
     | '/marketplace/$id'
     | '/api/public/mpesa-callback'
+    | '/api/public/paysuite-webhook'
     | '/api/public/stripe-webhook'
     | '/marketplace'
   id:
@@ -390,6 +402,7 @@ export interface FileRouteTypes {
     | '/_app/formulas/$id'
     | '/_app/marketplace/$id'
     | '/api/public/mpesa-callback'
+    | '/api/public/paysuite-webhook'
     | '/api/public/stripe-webhook'
     | '/_app/marketplace/'
   fileRoutesById: FileRoutesById
@@ -400,6 +413,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiPublicMpesaCallbackRoute: typeof ApiPublicMpesaCallbackRoute
+  ApiPublicPaysuiteWebhookRoute: typeof ApiPublicPaysuiteWebhookRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
@@ -615,6 +629,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicMpesaCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/paysuite-webhook': {
+      id: '/api/public/paysuite-webhook'
+      path: '/api/public/paysuite-webhook'
+      fullPath: '/api/public/paysuite-webhook'
+      preLoaderRoute: typeof ApiPublicPaysuiteWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/stripe-webhook': {
       id: '/api/public/stripe-webhook'
       path: '/api/public/stripe-webhook'
@@ -699,6 +720,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ApiChatRoute: ApiChatRoute,
   ApiPublicMpesaCallbackRoute: ApiPublicMpesaCallbackRoute,
+  ApiPublicPaysuiteWebhookRoute: ApiPublicPaysuiteWebhookRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
