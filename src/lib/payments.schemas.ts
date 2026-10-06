@@ -14,6 +14,13 @@ export const startStripeSchema = z.object({
 });
 export type StartStripeInput = z.infer<typeof startStripeSchema>;
 
+export const startPaysuiteSchema = z.object({
+  plan: z.enum(PAID_PLAN_IDS),
+  method: z.enum(["mpesa", "emola"]),
+  origin: z.string().url(),
+});
+export type StartPaysuiteInput = z.infer<typeof startPaysuiteSchema>;
+
 export const setCreditsSchema = z.object({
   userId: z.string().uuid(),
   credits: z.number().int().min(0).max(1_000_000),
