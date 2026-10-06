@@ -76,9 +76,9 @@ function StripeCard({ planId, amount, planName }: { planId: PaidPlanId; amount: 
 }
 
 function PaysuiteCard({ planId, amount }: { planId: PaidPlanId; amount: number }) {
-  const [busy, setBusy] = useState<null | "mpesa" | "emola">(null);
+  const [busy, setBusy] = useState<null | "emola">(null);
   const start = useServerFn(startPaysuiteCheckout);
-  async function pay(method: "mpesa" | "emola") {
+  async function pay(method: "emola") {
     setBusy(method);
     try {
       const res = await start({ data: { plan: planId, method, origin: window.location.origin } });
