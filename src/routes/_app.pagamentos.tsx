@@ -188,7 +188,7 @@ function PagamentosPage() {
       )}
 
 
-      {ps && <PaysuiteReturn paymentId={ps} />
+      {ps && <PaysuiteReturn paymentId={ps} />}
 
       {subscription && (
         <Card className="mt-6 flex items-center gap-3 border-secondary/40 bg-secondary-soft/40 p-4">
