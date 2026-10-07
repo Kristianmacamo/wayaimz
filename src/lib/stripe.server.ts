@@ -7,7 +7,7 @@ import process from "node:process";
 const API = "https://api.stripe.com/v1";
 
 function secretKey() {
-  const key = process.env["STRIPE_TEST_API_KEY"] ?? process.env["STRIPE_SECRET_KEY"];
+  const key = process.env["STRIPE_SECRET_KEY"];
   if (!key) throw new Error("STRIPE_SECRET_KEY não está configurada.");
   return key;
 }
