@@ -1,4 +1,4 @@
-/** PaySuite (M-Pesa / e-Mola / cartão) — SERVIDOR APENAS. */
+/** ePay (M-Pesa / e-Mola / IZI) — SERVIDOR APENAS. */
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { PLANS, type PaidPlanId } from "./plans";
 import { activatePlan } from "./payments.server";
@@ -30,6 +30,7 @@ export async function createPaysuiteCheckout(
   input: { plan: PaidPlanId; origin: string }
 ) {
   const plan = PLANS[input.plan];
+  const { data: who } = await supabaseAdmin.from("profiles").select("email, nome").eq("id", userId).maybeSingle();
   const reference = `WAY${crypto.randomUUID().replace(/-/g, "").slice(0, 12).toUpperCase()}`;
 
   const { data: payment, error } = await supabaseAdmin
@@ -53,6 +54,8 @@ export async function createPaysuiteCheckout(
       amount: plan.price,
       currency: "MZN",
       external_reference: reference,
+      ...(who?.email ? { customer_email: who.email } : {}),
+      ...(who?.nome ? { customer_name: who.nome } : {}),
       description: `Plano ${plan.name} - Way Estudantes AI`,
       return_url: `${input.origin}/pagamentos?plan=${input.plan}&ps=${payment.id}`,
       cancel_url: `${input.origin}/pagamentos?plan=${input.plan}`,
@@ -78,7 +81,7 @@ export async function createPaysuiteCheckout(
   return { ok: true as const, message: "A abrir pagamento...", url: d.payment_url as string };
 }
 
-/** Confirma o estado directamente na PaySuite (nunca confia no browser). */
+/** Confirma o estado directamente na ePay (nunca confia no browser). */
 export async function syncPaysuitePayment(paymentId: string, userId?: string) {
   let q = supabaseAdmin.from("payments").select("*").eq("id", paymentId);
   if (userId) q = q.eq("user_id", userId);
