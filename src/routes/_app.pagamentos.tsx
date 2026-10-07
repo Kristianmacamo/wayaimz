@@ -164,7 +164,7 @@ function PagamentosPage() {
     <div className="mx-auto max-w-3xl p-6 md:p-10">
       <h1 className="font-display text-3xl font-bold">Pagamentos</h1>
       <p className="mt-1 text-muted-foreground">
-        Escolha o plano e pague por M-Pesa, e-Mola ou IZI. O acesso é activado automaticamente.
+        Escolha o plano e pague por M-Pesa, e-Mola, IZI ou cartão bancário. O acesso é activado automaticamente.
       </p>
 
       {stripe === "sucesso" && (
@@ -220,6 +220,7 @@ function PagamentosPage() {
 
       <div className="mt-6 grid gap-4">
         <PaysuiteCard planId={selected.id} amount={selected.price} />
+        <StripeCard planId={selected.id} amount={selected.price} planName={selected.name} />
       </div>
 
       <h2 className="mt-10 font-display text-xl font-bold">Histórico de pagamentos</h2>
