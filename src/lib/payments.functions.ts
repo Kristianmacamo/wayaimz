@@ -26,7 +26,7 @@ export const startPaysuiteCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: StartPaysuiteInput) => startPaysuiteSchema.parse(d))
   .handler(async ({ data, context }) => {
-    const { createPaysuiteCheckout } = await import("./paysuite.server");
+    const { createPaysuiteCheckout } = await import("./epay.server");
     return createPaysuiteCheckout(context.userId, data);
   });
 
@@ -35,7 +35,7 @@ export const checkPaysuitePayment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { paymentId: string }) => z.object({ paymentId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    const { syncPaysuitePayment } = await import("./paysuite.server");
+    const { syncPaysuitePayment } = await import("./epay.server");
     return syncPaysuitePayment(data.paymentId, context.userId);
   });
 

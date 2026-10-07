@@ -16,7 +16,7 @@ export type StartStripeInput = z.infer<typeof startStripeSchema>;
 
 export const startPaysuiteSchema = z.object({
   plan: z.enum(PAID_PLAN_IDS),
-  method: z.literal("emola"),
+  
   origin: z.string().url(),
 });
 export type StartPaysuiteInput = z.infer<typeof startPaysuiteSchema>;

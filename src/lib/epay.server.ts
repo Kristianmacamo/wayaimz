@@ -3,11 +3,11 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { PLANS, type PaidPlanId } from "./plans";
 import { activatePlan } from "./payments.server";
 
-const BASE = "https://paysuite.tech/api/v1";
+const BASE = "https://checkout.epay.co.mz/api/v1";
 
 function token() {
-  const t = process.env["PAYSUITE_API_TOKEN"];
-  if (!t) throw new Error("PaySuite não configurada.");
+  const t = process.env["EPAY_SECRET_KEY"];
+  if (!t) throw new Error("ePay não configurada.");
   return t;
 }
 
@@ -27,7 +27,7 @@ async function ps(path: string, init?: RequestInit) {
 
 export async function createPaysuiteCheckout(
   userId: string,
-  input: { plan: PaidPlanId; method: "mpesa" | "emola"; origin: string }
+  input: { plan: PaidPlanId; origin: string }
 ) {
   const plan = PLANS[input.plan];
   const reference = `WAY${crypto.randomUUID().replace(/-/g, "").slice(0, 12).toUpperCase()}`;
@@ -39,8 +39,8 @@ export async function createPaysuiteCheckout(
       plan: input.plan,
       amount: plan.price,
       payment_reference: reference,
-      phone_number: "PaySuite",
-      provider: `paysuite_${input.method}`,
+      phone_number: "ePay",
+      provider: "epay",
       status: "a_processar",
     })
     .select("id")
@@ -51,22 +51,23 @@ export async function createPaysuiteCheckout(
     method: "POST",
     body: JSON.stringify({
       amount: plan.price,
-      method: input.method,
-      reference,
+      currency: "MZN",
+      external_reference: reference,
       description: `Plano ${plan.name} - Way Estudantes AI`,
       return_url: `${input.origin}/pagamentos?plan=${input.plan}&ps=${payment.id}`,
-      webhook_url: `${input.origin}/api/public/paysuite-webhook`,
+      cancel_url: `${input.origin}/pagamentos?plan=${input.plan}`,
+      callback_url: `${input.origin}/api/public/epay-webhook`,
     }),
   });
 
-  const d = r.body?.data;
-  if (!r.ok || !d?.checkout_url) {
-    console.error("[paysuite] create failed", r.status, r.body);
+  const d = (r.body?.data ?? r.body) as Record<string, any>;
+  if (!r.ok || !d?.payment_url) {
+    console.error("[epay] create failed", r.status, r.body);
     await supabaseAdmin
       .from("payments")
       .update({ status: "falhado", error_message: String(r.body?.message ?? `HTTP ${r.status}`), api_response: r.body as never })
       .eq("id", payment.id);
-    return { ok: false as const, message: r.body?.message ?? "A PaySuite recusou o pedido. Tente novamente.", url: null };
+    return { ok: false as const, message: r.body?.message ?? "A ePay recusou o pedido. Tente novamente.", url: null };
   }
 
   await supabaseAdmin
@@ -74,7 +75,7 @@ export async function createPaysuiteCheckout(
     .update({ conversation_id: d.id, api_response: r.body as never })
     .eq("id", payment.id);
 
-  return { ok: true as const, message: "A abrir pagamento...", url: d.checkout_url as string };
+  return { ok: true as const, message: "A abrir pagamento...", url: d.payment_url as string };
 }
 
 /** Confirma o estado directamente na PaySuite (nunca confia no browser). */
@@ -86,15 +87,15 @@ export async function syncPaysuitePayment(paymentId: string, userId?: string) {
   if (p.status === "concluido") return { status: "concluido", message: "Plano já activado." };
 
   const r = await ps(`/payments/${p.conversation_id}`);
-  const d = r.body?.data;
-  const paid = d?.status === "paid" || d?.transaction?.status === "completed";
-  const failed = ["failed", "cancelled", "expired"].includes(d?.status);
+  const d = (r.body?.data ?? r.body) as Record<string, any>;
+  const paid = d?.status === "paid";
+  const failed = ["failed", "cancelled"].includes(d?.status);
 
   if (paid) {
     // Marcar concluído de forma atómica para evitar activação dupla.
     const { data: upd } = await supabaseAdmin
       .from("payments")
-      .update({ status: "concluido", transaction_id: d?.transaction?.transaction_id ?? null, api_response: r.body as never, updated_at: new Date().toISOString() })
+      .update({ status: "concluido", transaction_id: (d?.id ?? null), api_response: r.body as never, updated_at: new Date().toISOString() })
       .eq("id", p.id)
       .neq("status", "concluido")
       .select("id");
@@ -105,7 +106,7 @@ export async function syncPaysuitePayment(paymentId: string, userId?: string) {
         const { sendAdminPaymentEmail } = await import("./notify.server");
         await sendAdminPaymentEmail({
           paymentId: p.id, plan: p.plan as PaidPlanId, amount: Number(p.amount), userEmail: prof?.email ?? "",
-          phone: p.phone_number ?? "", transactionId: d?.transaction?.transaction_id ?? null, reference: p.payment_reference, status: "concluido",
+          phone: p.phone_number ?? "", transactionId: (d?.id ?? null), reference: p.payment_reference, status: "concluido",
         });
       } catch (e) { console.warn("notify failed", e); }
     }
