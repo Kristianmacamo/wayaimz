@@ -76,12 +76,12 @@ function StripeCard({ planId, amount, planName }: { planId: PaidPlanId; amount: 
 }
 
 function PaysuiteCard({ planId, amount }: { planId: PaidPlanId; amount: number }) {
-  const [busy, setBusy] = useState<null | "emola">(null);
+  const [busy, setBusy] = useState<null | "epay">(null);
   const start = useServerFn(startPaysuiteCheckout);
-  async function pay(method: "emola") {
+  async function pay(method: "epay") {
     setBusy(method);
     try {
-      const res = await start({ data: { plan: planId, method, origin: window.location.origin } });
+      const res = await start({ data: { plan: planId, origin: window.location.origin } });
       if (res.ok && res.url) {
         window.location.href = res.url;
         return;
@@ -96,14 +96,14 @@ function PaysuiteCard({ planId, amount }: { planId: PaidPlanId; amount: number }
     <Card className="space-y-3 p-5">
       <div className="flex items-center gap-2">
         <Smartphone className="h-5 w-5 text-primary" />
-        <p className="font-medium">e-Mola (Movitel)</p>
+        <p className="font-medium">M-Pesa, e-Mola ou IZI (ePay)</p>
       </div>
       <p className="text-sm text-muted-foreground">
-        Introduza o seu número e-Mola na página segura e confirme com o PIN. O plano é activado automaticamente.
+        Escolha M-Pesa, e-Mola ou IZI na página segura da ePay e confirme no telemóvel. O plano é activado automaticamente.
       </p>
-      <Button onClick={() => pay("emola")} disabled={!!busy} variant="outline" className="w-full">
-        {busy === "emola" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Smartphone className="mr-2 h-4 w-4" />}
-        Pagar {amount} MT com e-Mola
+      <Button onClick={() => pay("epay")} disabled={!!busy} className="w-full">
+        {busy === "epay" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Smartphone className="mr-2 h-4 w-4" />}
+        Pagar {amount} MT
       </Button>
     </Card>
   );
@@ -164,7 +164,7 @@ function PagamentosPage() {
     <div className="mx-auto max-w-3xl p-6 md:p-10">
       <h1 className="font-display text-3xl font-bold">Pagamentos</h1>
       <p className="mt-1 text-muted-foreground">
-        Escolha o plano e pague por M-Pesa ou cartão bancário. O acesso é activado automaticamente.
+        Escolha o plano e pague por M-Pesa, e-Mola ou IZI. O acesso é activado automaticamente.
       </p>
 
       {stripe === "sucesso" && (
@@ -219,17 +219,7 @@ function PagamentosPage() {
       </Link>
 
       <div className="mt-6 grid gap-4">
-        <MpesaForm
-          planId={selected.id}
-          amount={selected.price}
-          onDone={() => {
-            qc.invalidateQueries({ queryKey: ["my-payments"] });
-            qc.invalidateQueries({ queryKey: ["my-subscription"] });
-            qc.invalidateQueries({ queryKey: ["my-profile"] });
-          }}
-        />
         <PaysuiteCard planId={selected.id} amount={selected.price} />
-        <StripeCard planId={selected.id} amount={selected.price} planName={selected.name} />
       </div>
 
       <h2 className="mt-10 font-display text-xl font-bold">Histórico de pagamentos</h2>

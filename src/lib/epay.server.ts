@@ -62,7 +62,7 @@ export async function createPaysuiteCheckout(
 
   const d = (r.body?.data ?? r.body) as Record<string, any>;
   if (!r.ok || !d?.payment_url) {
-    console.error("[paysuite] create failed", r.status, r.body);
+    console.error("[epay] create failed", r.status, r.body);
     await supabaseAdmin
       .from("payments")
       .update({ status: "falhado", error_message: String(r.body?.message ?? `HTTP ${r.status}`), api_response: r.body as never })
@@ -75,7 +75,7 @@ export async function createPaysuiteCheckout(
     .update({ conversation_id: d.id, api_response: r.body as never })
     .eq("id", payment.id);
 
-  return { ok: true as const, message: "A abrir pagamento...", url: d.checkout_url as string };
+  return { ok: true as const, message: "A abrir pagamento...", url: d.payment_url as string };
 }
 
 /** Confirma o estado directamente na PaySuite (nunca confia no browser). */
