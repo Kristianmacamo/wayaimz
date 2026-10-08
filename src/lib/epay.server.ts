@@ -6,7 +6,7 @@ import { activatePlan } from "./payments.server";
 const BASE = "https://checkout.epay.co.mz/api/v1";
 
 function token() {
-  const t = process.env["EPAY_SECRET_KEY"];
+  const t = process.env["EPAY_SECRET_KEY"] ?? process.env["STRIPE_LIVE_API_KEY"];
   if (!t) throw new Error("ePay não configurada.");
   return t;
 }
