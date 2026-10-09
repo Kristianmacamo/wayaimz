@@ -3,7 +3,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { PLANS, type PaidPlanId } from "./plans";
 import { activatePlan } from "./payments.server";
 
-const BASE = "https://checkout.epay.co.mz/api/v1";
+const BASE = process.env["EPAY_API_BASE_URL"] ?? "https://checkout.epay.co.mz/api/v1";
 
 function token() {
   const t = process.env["EPAY_SECRET_KEY"];
@@ -106,8 +106,8 @@ export async function syncPaysuitePayment(paymentId: string, userId?: string) {
       const { data: prof } = await supabaseAdmin.from("profiles").select("credits, email").eq("id", p.user_id).maybeSingle();
       await activatePlan(p.user_id, p.id, p.payment_reference, p.plan as PaidPlanId, prof?.credits ?? 0);
       try {
-        const { sendAdminPaymentEmail } = await import("./notify.server");
-        await sendAdminPaymentEmail({
+        const { sendPaymentConfirmationEmails } = await import("./notify.server");
+        await sendPaymentConfirmationEmails({
           paymentId: p.id, plan: p.plan as PaidPlanId, amount: Number(p.amount), userEmail: prof?.email ?? "",
           phone: p.phone_number ?? "", transactionId: (d?.id ?? null), reference: p.payment_reference, status: "concluido",
         });

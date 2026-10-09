@@ -16,34 +16,40 @@ export type AdminPaymentNotice = {
   status: string;
 };
 
-/** Envia um email ao admin sempre que um pagamento M-Pesa é concluído. */
-export async function sendAdminPaymentEmail(notice: AdminPaymentNotice) {
-  try {
-    const origin = process.env["SITE_URL"] ?? "";
-    if (!origin) {
-      console.info("[notify] admin payment", notice);
-      return { ok: false, reason: "SITE_URL em falta" };
-    }
-    const res = await fetch(`${origin}/lovable/email/transactional/send`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env["LOVABLE_API_KEY"] ?? ""}`,
-      },
-      body: JSON.stringify({
-        templateName: "admin-payment-notification",
-        recipientEmail: ADMIN_EMAIL,
-        idempotencyKey: `payment-${notice.paymentId}-${notice.status}`,
-        templateData: notice,
-      }),
-    });
-    if (!res.ok) {
-      console.warn("[notify] admin email falhou", res.status, await res.text());
-      return { ok: false, reason: `HTTP ${res.status}` };
-    }
-    return { ok: true };
-  } catch (e) {
-    console.warn("[notify] admin email erro", e);
-    return { ok: false, reason: e instanceof Error ? e.message : String(e) };
+async function sendPaymentEmail(templateName: string, recipientEmail: string, notice: AdminPaymentNotice) {
+  const origin = process.env["SITE_URL"] ?? "";
+  const apiKey = process.env["LOVABLE_API_KEY"] ?? "";
+  if (!origin || !apiKey || !recipientEmail) {
+    console.info("[notify] email não enviado: configuração ou destinatário em falta", { recipientEmail, paymentId: notice.paymentId });
+    return { ok: false, reason: "Configuração de email em falta" };
   }
+  const res = await fetch(`${origin}/lovable/email/transactional/send`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({
+      templateName,
+      recipientEmail,
+      idempotencyKey: `payment-${notice.paymentId}-${templateName}-${notice.status}`,
+      templateData: notice,
+    }),
+  });
+  if (!res.ok) {
+    console.warn("[notify] email falhou", templateName, res.status, await res.text());
+    return { ok: false, reason: `HTTP ${res.status}` };
+  }
+  return { ok: true };
+}
+
+/** Envia confirmação ao aluno e aviso ao admin após pagamento confirmado. */
+export async function sendPaymentConfirmationEmails(notice: AdminPaymentNotice) {
+  const results = await Promise.allSettled([
+    sendPaymentEmail("payment-confirmation", notice.userEmail, notice),
+    sendPaymentEmail("admin-payment-notification", ADMIN_EMAIL, notice),
+  ]);
+  return { ok: results.every((result) => result.status === "fulfilled" && result.value.ok) };
+}
+
+/** Compatibilidade com chamadas antigas. */
+export async function sendAdminPaymentEmail(notice: AdminPaymentNotice) {
+  return sendPaymentEmail("admin-payment-notification", ADMIN_EMAIL, notice);
 }

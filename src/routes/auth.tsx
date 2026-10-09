@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
 
@@ -185,8 +184,12 @@ function AuthPage() {
             onClick={async () => {
               setLoading(true);
               try {
-                const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/chat" });
-                if (r.error) throw r.error;
+                const redirectTo = import.meta.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/chat`;
+                const { error } = await supabase.auth.signInWithOAuth({
+                  provider: "google",
+                  options: { redirectTo },
+                });
+                if (error) throw error;
               } catch (err) {
                 toast.error(err instanceof Error ? err.message : "Erro Google");
                 setLoading(false);
