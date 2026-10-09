@@ -64,7 +64,9 @@ export async function createPaysuiteCheckout(
   });
 
   const d = (r.body?.data ?? r.body) as Record<string, any>;
-  if (!r.ok || !d?.payment_url) {
+  const paymentUrl = d?.payment_url ?? d?.checkout_url ?? d?.url;
+  const providerPaymentId = d?.id ?? d?.payment_id ?? d?.checkout_id;
+  if (!r.ok || typeof paymentUrl !== "string") {
     console.error("[epay] create failed", r.status, r.body);
     await supabaseAdmin
       .from("payments")
@@ -75,10 +77,10 @@ export async function createPaysuiteCheckout(
 
   await supabaseAdmin
     .from("payments")
-    .update({ conversation_id: d.id, api_response: r.body as never })
+    .update({ conversation_id: providerPaymentId ?? null, api_response: r.body as never })
     .eq("id", payment.id);
 
-  return { ok: true as const, message: "A abrir pagamento...", url: d.payment_url as string };
+  return { ok: true as const, message: "A abrir pagamento...", url: paymentUrl };
 }
 
 /** Confirma o estado directamente na ePay (nunca confia no browser). */
@@ -91,8 +93,15 @@ export async function syncPaysuitePayment(paymentId: string, userId?: string) {
 
   const r = await ps(`/payments/${p.conversation_id}`);
   const d = (r.body?.data ?? r.body) as Record<string, any>;
-  const paid = d?.status === "paid";
-  const failed = ["failed", "cancelled"].includes(d?.status);
+  const rawStatus = String(d?.status ?? d?.payment_status ?? d?.state ?? "").trim().toLowerCase();
+  const paid = ["paid", "success", "successful", "completed", "complete", "confirmed"].includes(rawStatus) || d?.paid === true;
+  const failed = ["failed", "failure", "cancelled", "canceled", "rejected", "expired"].includes(rawStatus);
+
+  if (!r.ok) {
+    const detail = String(d?.message ?? d?.error ?? `HTTP ${r.status}`);
+    await supabaseAdmin.from("payments").update({ error_message: `ePay: ${detail}`, api_response: r.body as never }).eq("id", p.id);
+    return { status: "a_processar", message: "Não foi possível consultar a ePay agora. Vamos tentar novamente automaticamente." };
+  }
 
   if (paid) {
     // Marcar concluído de forma atómica para evitar activação dupla.

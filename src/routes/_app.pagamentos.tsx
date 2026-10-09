@@ -4,7 +4,7 @@ import { PLANS, PAID_PLAN_IDS, PAYMENT_STATUS_LABEL, isPaidPlan, type PaidPlanId
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Smartphone, CheckCircle2, Loader2, ShieldCheck, XCircle, CreditCard } from "lucide-react";
+import { Smartphone, CheckCircle2, Loader2, ShieldCheck, XCircle, CreditCard, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -126,10 +126,14 @@ function PaysuiteReturn({ paymentId }: { paymentId: string }) {
     refetchInterval: (q) => (q.state.data?.status === "a_processar" ? 4000 : false),
   });
   const ok = data?.status === "concluido";
+  const failed = data?.status === "falhado";
   return (
-    <Card className={`mt-6 flex items-center gap-3 p-4 text-sm ${ok ? "border-secondary/40 bg-secondary-soft/40" : ""}`}>
-      {ok ? <CheckCircle2 className="h-5 w-5 text-secondary" /> : <Loader2 className="h-5 w-5 animate-spin" />}
-      {data?.message ?? "A verificar o pagamento..."}
+    <Card className={`mt-6 flex items-center gap-3 p-4 text-sm ${ok ? "border-secondary/40 bg-secondary-soft/40" : failed ? "border-destructive/40" : ""}`}>
+      {ok ? <CheckCircle2 className="h-5 w-5 text-secondary" /> : failed ? <XCircle className="h-5 w-5 text-destructive" /> : <Loader2 className="h-5 w-5 animate-spin" />}
+      <span className="flex-1">{data?.message ?? "A verificar o pagamento..."}</span>
+      {!ok && <Button type="button" size="sm" variant="outline" onClick={() => void qc.invalidateQueries({ queryKey: ["ps-check", paymentId] })}>
+        <RefreshCw className="mr-1 h-3.5 w-3.5" /> Verificar novamente
+      </Button>}
     </Card>
   );
 }
